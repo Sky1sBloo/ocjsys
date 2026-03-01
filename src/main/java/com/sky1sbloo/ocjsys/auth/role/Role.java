@@ -19,10 +19,11 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id")
-    private long id;
+    private Long id;
     @Enumerated(EnumType.STRING)
     @Column(length=10, unique = true)
     private Roles name;
+    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name="roles_permissions",

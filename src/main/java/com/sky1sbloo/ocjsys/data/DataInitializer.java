@@ -15,19 +15,27 @@ public class DataInitializer {
 
     @PostConstruct
     public void initRolesAndPermissions() {
-        if (roleRepository.findByName(Roles.USER).isEmpty()) {
-            Role user = new Role();
-            user.setName(Roles.USER);
-            roleRepository.save(user);
-        }
+        createRoleIfNotExists(Roles.USER, Set.of());
+        Set<Permission> adminPermissions = Set.of(
+                getOrCreatePermission(Permissions.READ_USERS_INFO),
+                getOrCreatePermission(Permissions.CHANGE_USER_ROLE)
+        );
+        createRoleIfNotExists(Roles.ADMIN, adminPermissions);
+    }
 
-        if (roleRepository.findByName(Roles.ADMIN).isEmpty()) {
-            Permission readUsers = permissionRepository.save(new Permission(null, "READ_USERS_INFO"));
-            Permission changeUserRole = permissionRepository.save(new Permission(null, "CHANGE_USER_ROLE"));
-            Role admin = new Role();
-            admin.setName(Roles.ADMIN);
-            admin.setPermissions(Set.of(readUsers, changeUserRole));
-            roleRepository.save(admin);
+    private Permission getOrCreatePermission(Permissions permissionName) {
+        return permissionRepository.findByName(permissionName).orElseGet(
+                () -> permissionRepository.save(
+                        new Permission(null, permissionName))
+        );
+    }
+
+    private void createRoleIfNotExists(Roles roleName, Set<Permission> permissions) {
+        if (roleRepository.findByName(roleName).isEmpty()) {
+            Role role = new Role();
+            role.setName(roleName);
+            role.setPermissions(permissions);
+            roleRepository.save(role);
         }
     }
 }

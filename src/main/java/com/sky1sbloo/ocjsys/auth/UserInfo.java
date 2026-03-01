@@ -15,9 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Data
 @Table(name = "users")
@@ -33,6 +31,7 @@ public class UserInfo implements UserDetails {
     private String username;
     private String password;
 
+    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name="user_roles",
         joinColumns = @JoinColumn(name="user_id"),
@@ -45,7 +44,7 @@ public class UserInfo implements UserDetails {
         for (Role role : roles) {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
             for (Permission permission : role.getPermissions()) {
-                authorities.add(new SimpleGrantedAuthority(permission.getName()));
+                authorities.add(new SimpleGrantedAuthority(permission.getName().name()));
             }
         }
         return authorities;
