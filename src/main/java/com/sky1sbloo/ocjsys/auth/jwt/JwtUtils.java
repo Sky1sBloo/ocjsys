@@ -11,7 +11,6 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -42,7 +41,7 @@ public class JwtUtils {
                 .map(role -> role.getName().name()).toList();
         Set<String> permissions = userDetails.getRoles().stream()
                 .flatMap(role -> role.getPermissions().stream())
-                .map(Permission::getName)
+                .map(permission -> permission.getName().name())
                 .collect(Collectors.toSet());
         return Jwts.builder()
                 .claim("roles", roles)
