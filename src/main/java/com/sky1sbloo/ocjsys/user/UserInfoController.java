@@ -59,7 +59,7 @@ public class UserInfoController {
     @PutMapping("/role")
     @PreAuthorize("hasAuthority('CHANGE_USER_ROLE')")
     public ResponseEntity<?> setUserRole(@RequestParam(value = "id") long userId,
-                                         @RequestParam(value = "role_name") List<String> roleNames) {
+                                         @RequestParam(value = "roles") List<String> roleNames) {
         Set<Roles> rolesEnum = new HashSet<>();
         try {
             for (String roleName : roleNames) {
