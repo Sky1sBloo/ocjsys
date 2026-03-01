@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: Online code judgement system
+  datasource:
+    url: jdbc:h2:mem:ocjsysdb
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create
+  h2:
+    console:
+      enabled: true
+  auth:
+    jwt:
+      secret: Jj5XQ0hjRy8=PV0=NXxXaEZmWCxRWCoveHM4WCN6aTkrRj81YQ==dGgtTGE2elhjLHgpJXtU
+      expiration-mins: 15
+      refresh-expiration-days: 1
+
+
+#logging:
+#  level:
+#    root: DEBUG
