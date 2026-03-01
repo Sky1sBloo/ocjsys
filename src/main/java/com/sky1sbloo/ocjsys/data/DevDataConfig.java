@@ -5,9 +5,11 @@ import com.sky1sbloo.ocjsys.auth.role.PermissionRepository;
 import com.sky1sbloo.ocjsys.auth.role.RoleRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 
 @Configuration
+@Profile("dev")
 public class DevDataConfig {
     @Bean
     @Order(1)
