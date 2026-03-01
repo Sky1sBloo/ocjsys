@@ -2,6 +2,8 @@ services:
   ocjsys_db:
     image: postgres:18.3-alpine3.23
     container_name: ocjsys_db
+    ports:
+     -  '5432:5432'
     environment:
       POSTGRES_USER: root_user
       POSTGRES_PASSWORD: password@1234
@@ -9,9 +11,9 @@ services:
     volumes:
       - ocjsys_db:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" ]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
       retries: 5
   ocjsys_server:
     container_name: ocjsys_server
