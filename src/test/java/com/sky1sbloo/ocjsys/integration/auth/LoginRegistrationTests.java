@@ -77,7 +77,7 @@ public class LoginRegistrationTests {
         mockMvc.perform(get("/profile")
                         .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("username").value("test_user"));
+                .andExpect(jsonPath("$.username").value("test_user"));
     }
 
     @Test
