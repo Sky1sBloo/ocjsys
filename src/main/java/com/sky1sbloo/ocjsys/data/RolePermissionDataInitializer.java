@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 @RequiredArgsConstructor
-@Component
+@Component("rolePermissionDataInitializer")
 public class RolePermissionDataInitializer implements DataInitializer{
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;

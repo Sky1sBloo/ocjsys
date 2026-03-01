@@ -8,6 +8,8 @@ services:
       POSTGRES_USER: root_user
       POSTGRES_PASSWORD: password@1234
       POSTGRES_DB: ocjsys
+      DEV_ADMIN_USERNAME: root
+      DEV_ADMIN_PASSWORD: password@1234
     volumes:
       - ocjsys_db:/var/lib/postgresql/data
     healthcheck:
