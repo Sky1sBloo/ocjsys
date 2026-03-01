@@ -55,7 +55,12 @@ public class AuthenticationController {
                 .map(GrantedAuthority::getAuthority).toList();
         String jwtToken = jwtUtils.generateTokenFromUserDetails(userDetails);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
-        var response = new LoginResponse(userDetails.getUsername(), roles, jwtToken, refreshToken.getToken());
+        var response = new LoginResponse(
+                userDetails.getId(),
+                userDetails.getUsername(),
+                roles,
+                jwtToken,
+                refreshToken.getToken());
         return ResponseEntity.ok(response);
     }
 
