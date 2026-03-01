@@ -56,7 +56,7 @@ public class UserInfoController {
         return ResponseEntity.ok().body(userListDto);
     }
 
-    @PutMapping("/")
+    @PutMapping("/role")
     @PreAuthorize("hasAuthority('CHANGE_USER_ROLE')")
     public ResponseEntity<?> setUserRole(@RequestParam(value = "id") long userId,
                                          @RequestParam(value = "role_name") List<String> roleNames) {
