@@ -1,4 +1,37 @@
 spring:
+  profiles:
+    active: dev
+  auth:
+    jwt:
+      secret: Jj5XQ0hjRy8=PV0=NXxXaEZmWCxRWCoveHM4WCN6aTkrRj81YQ==dGgtTGE2elhjLHgpJXtU
+      expiration-mins: 15
+      refresh-expiration-days: 1
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  data:
+    dev:
+      admin:
+        username: ${DEV_ADMIN_USERNAME}
+        password: ${DEV_ADMIN_PASSWORD}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    testWhileIdle: true
+    validationQuery: SELECT 1
+  jpa:
+    hibernate:
+      show-sql: false
+      ddl-auto: create-drop
+---
+spring:
+  config:
+    activate:
+      on-profile: test
   application:
     name: Online code judgement system
   datasource:
@@ -10,13 +43,3 @@ spring:
   h2:
     console:
       enabled: true
-  auth:
-    jwt:
-      secret: Jj5XQ0hjRy8=PV0=NXxXaEZmWCxRWCoveHM4WCN6aTkrRj81YQ==dGgtTGE2elhjLHgpJXtU
-      expiration-mins: 15
-      refresh-expiration-days: 1
-
-
-#logging:
-#  level:
-#    root: DEBUG

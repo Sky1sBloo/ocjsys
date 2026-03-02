@@ -1,0 +1,35 @@
+services:
+  ocjsys_db:
+    image: postgres:18.3-alpine3.23
+    container_name: ocjsys_db
+    ports:
+     -  '5432:5432'
+    environment:
+      POSTGRES_USER: root_user
+      POSTGRES_PASSWORD: password@1234
+      POSTGRES_DB: ocjsys
+    volumes:
+      - ocjsys_db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "ocjsys", "-U", "root_user" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  ocjsys_server:
+    container_name: ocjsys_server
+    build: .
+    depends_on:
+      ocjsys_db:
+        condition: service_healthy
+    ports:
+      - '8080:8080'
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ocjsys_db:5432/ocjsys
+      SPRING_DATASOURCE_USERNAME: root_user
+      SPRING_DATASOURCE_PASSWORD: password@1234
+      DEV_ADMIN_USERNAME: root
+      DEV_ADMIN_PASSWORD: password@1234
+
+
+volumes:
+  ocjsys_db:
