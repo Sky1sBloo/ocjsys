@@ -6,7 +6,6 @@ import com.sky1sbloo.ocjsys.auth.role.Role;
 import com.sky1sbloo.ocjsys.auth.role.RoleRepository;
 import com.sky1sbloo.ocjsys.auth.role.Roles;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
