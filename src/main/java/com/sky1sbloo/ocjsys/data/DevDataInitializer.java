@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 @Profile("dev")
-@RequiredArgsConstructor
 @Component()
 @DependsOn("rolePermissionDataInitializer")
 public class DevDataInitializer implements DataInitializer {
@@ -28,6 +27,14 @@ public class DevDataInitializer implements DataInitializer {
     private String devAdminUsername;
     @Value("${spring.data.dev.admin.password}")
     private String devAdminPassword;
+
+    public DevDataInitializer(UserInfoRepository userInfoRepository,
+                              RoleRepository roleRepository,
+                              PasswordEncoder passwordEncoder) {
+        this.userInfoRepository = userInfoRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     @PostConstruct

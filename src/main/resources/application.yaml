@@ -12,9 +12,10 @@ spring:
     activate:
       on-profile: dev
   data:
-    admin:
-      username: ${DEV_ADMIN_USERNAME}
-      password: ${DEV_ADMIN_PASSWORD}
+    dev:
+      admin:
+        username: ${DEV_ADMIN_USERNAME}
+        password: ${DEV_ADMIN_PASSWORD}
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
