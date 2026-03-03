@@ -1,7 +1,6 @@
 package com.sky1sbloo.ocjsys.auth.jwt;
 
-import com.sky1sbloo.ocjsys.auth.UserInfo;
-import com.sky1sbloo.ocjsys.auth.role.Permission;
+import com.sky1sbloo.ocjsys.auth.AuthUser;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -36,7 +35,7 @@ public class JwtUtils {
         return null;
     }
 
-    public String generateTokenFromUserDetails(UserInfo userDetails) {
+    public String generateTokenFromUserDetails(AuthUser userDetails) {
         List<String> roles = userDetails.getRoles().stream()
                 .map(role -> role.getName().name()).toList();
         Set<String> permissions = userDetails.getRoles().stream()

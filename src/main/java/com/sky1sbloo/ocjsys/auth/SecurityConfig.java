@@ -34,9 +34,13 @@ public class SecurityConfig {
         return httpSecurity
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers(HttpMethod.POST, "/login", "/register", "/logout").permitAll()
+                                .requestMatchers(HttpMethod.POST,
+                                        "/auth/login",
+                                        "/auth/register",
+                                        "/auth/logout").permitAll()
                                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                                .requestMatchers("/refresh").authenticated()
+                                .requestMatchers("/auth/refresh").authenticated()
+                                .requestMatchers("/auth/role").hasAuthority("CHANGE_USER_ROLE")
                                 .requestMatchers("/profile").authenticated()
                                 .anyRequest().authenticated())
                 .sessionManagement(sessionManagement ->

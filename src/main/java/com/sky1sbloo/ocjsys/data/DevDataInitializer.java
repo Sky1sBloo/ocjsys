@@ -1,10 +1,12 @@
 package com.sky1sbloo.ocjsys.data;
 
-import com.sky1sbloo.ocjsys.auth.UserInfo;
-import com.sky1sbloo.ocjsys.auth.UserInfoRepository;
+import com.sky1sbloo.ocjsys.auth.AuthUser;
+import com.sky1sbloo.ocjsys.auth.AuthUserRepository;
 import com.sky1sbloo.ocjsys.auth.role.Role;
 import com.sky1sbloo.ocjsys.auth.role.RoleRepository;
 import com.sky1sbloo.ocjsys.auth.role.Roles;
+import com.sky1sbloo.ocjsys.userprofile.UserProfile;
+import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
@@ -18,7 +20,8 @@ import java.util.Set;
 @Component()
 @DependsOn("rolePermissionDataInitializer")
 public class DevDataInitializer implements DataInitializer {
-    private final UserInfoRepository userInfoRepository;
+    private final AuthUserRepository authUserRepository;
+    private final UserProfileRepository userProfileRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -27,10 +30,11 @@ public class DevDataInitializer implements DataInitializer {
     @Value("${spring.data.dev.admin.password}")
     private String devAdminPassword;
 
-    public DevDataInitializer(UserInfoRepository userInfoRepository,
+    public DevDataInitializer(AuthUserRepository authUserRepository, UserProfileRepository userProfileRepository,
                               RoleRepository roleRepository,
                               PasswordEncoder passwordEncoder) {
-        this.userInfoRepository = userInfoRepository;
+        this.authUserRepository = authUserRepository;
+        this.userProfileRepository = userProfileRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -40,11 +44,17 @@ public class DevDataInitializer implements DataInitializer {
     public void initialize() {
         Role role = roleRepository.findByName(Roles.ADMIN).orElseThrow(
                 () -> new IllegalStateException("Role admin does not exist. Ensure bean is initialized in order"));
-        UserInfo adminUser = UserInfo.builder()
+        AuthUser newAdminUser = AuthUser.builder()
                 .username(devAdminUsername)
                 .password(passwordEncoder.encode(devAdminPassword))
                 .roles(Set.of(role))
                 .build();
-        userInfoRepository.save(adminUser);
+        AuthUser adminUser = authUserRepository.save(newAdminUser);
+        UserProfile adminProfile = UserProfile.builder()
+                .name("Administrator")
+                .authUser(adminUser).build();
+        userProfileRepository.save(adminProfile);
+        adminUser.setUserProfile(adminProfile);
+        authUserRepository.save(adminUser);
     }
 }

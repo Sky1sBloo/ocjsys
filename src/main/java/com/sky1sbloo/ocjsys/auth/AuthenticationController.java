@@ -8,30 +8,35 @@ import com.sky1sbloo.ocjsys.auth.refreshtoken.RefreshTokenService;
 import com.sky1sbloo.ocjsys.auth.role.Role;
 import com.sky1sbloo.ocjsys.auth.role.RoleRepository;
 import com.sky1sbloo.ocjsys.auth.role.Roles;
+import com.sky1sbloo.ocjsys.userprofile.UserProfile;
+import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 @RequiredArgsConstructor
+@Slf4j
 @RestController
+@RequestMapping("/auth")
 public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
-    private final UserInfoRepository userInfoRepository;
+    private final AuthUserRepository authUserRepository;
+    private final UserProfileRepository userProfileRepository;
     private final RoleRepository roleRepository;
     private final RefreshTokenService refreshTokenService;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -49,7 +54,7 @@ public class AuthenticationController {
             return new ResponseEntity<Object>(map, HttpStatus.UNAUTHORIZED);
         }
         SecurityContextHolder.getContext().setAuthentication(auth);
-        UserInfo userDetails = (UserInfo) auth.getPrincipal();
+        AuthUser userDetails = (AuthUser) auth.getPrincipal();
         assert userDetails != null;
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).toList();
@@ -67,10 +72,10 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest userRegisterDto) {
-        if (userInfoRepository.existsByUsername(userRegisterDto.getUsername())) {
+        if (authUserRepository.existsByUsername(userRegisterDto.getUsername())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        UserInfo newUser = new UserInfo();
+        AuthUser newUser = new AuthUser();
         newUser.setUsername(userRegisterDto.getUsername());
         newUser.setPassword(passwordEncoder.encode(userRegisterDto.getPassword()));
 
@@ -79,7 +84,11 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Cannot register default role");
         }
         newUser.setRoles(Set.of(defaultRole.get()));
-        UserInfo user = userInfoRepository.save(newUser);
+        AuthUser user = authUserRepository.save(newUser);
+        UserProfile newUserProfile = UserProfile.builder()
+                .name(userRegisterDto.getName())
+                .authUser(user).build();
+        userProfileRepository.save(newUserProfile);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new RegisterResponse(user.getId(), user.getUsername())
         );
@@ -118,5 +127,36 @@ public class AuthenticationController {
                 .orElse(
                         ResponseEntity.badRequest().body("Invalid refresh token")
                 );
+    }
+
+    @PutMapping("/role")
+    @PreAuthorize("hasAuthority('CHANGE_USER_ROLE')")
+    public ResponseEntity<?> setUserRole(@RequestParam(value = "id") long userId,
+                                         @RequestParam(value = "roles") List<String> roleNames) {
+        Set<Roles> rolesEnum = new HashSet<>();
+        try {
+            for (String roleName : roleNames) {
+                rolesEnum.add(Roles.valueOf(roleName));
+            }
+
+            Set<Role> roles = new HashSet<>();
+            for (Roles roleEnum : rolesEnum) {
+                Role role = roleRepository.findByName(roleEnum)
+                        .orElseThrow(() -> new EntityNotFoundException("Cannot find role: " + roleEnum.name()));
+                roles.add(role);
+            }
+            Optional<AuthUser> userInfo = authUserRepository.findById(userId);
+            if (userInfo.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find user");
+            }
+            userInfo.get().setRoles(roles);
+            authUserRepository.save(userInfo.get());
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid role name");
+        } catch (EntityNotFoundException ex) {
+            log.error(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role not found");
+        }
     }
 }

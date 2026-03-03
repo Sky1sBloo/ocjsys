@@ -1,4 +1,4 @@
-package com.sky1sbloo.ocjsys.user.dto;
+package com.sky1sbloo.ocjsys.userprofile.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -12,11 +12,13 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserInfoDto {
+public class UserProfileDto {
     @JsonProperty("id")
     private long id;
     @JsonProperty("username")
     private String username;
+    @JsonProperty
+    private String name;
     @JsonProperty("roles")
     private List<String> roles;
 }
