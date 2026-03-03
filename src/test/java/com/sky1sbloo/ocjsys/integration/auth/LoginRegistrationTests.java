@@ -6,10 +6,7 @@ import com.sky1sbloo.ocjsys.auth.dto.LoginRequest;
 import com.sky1sbloo.ocjsys.auth.dto.LoginResponse;
 import com.sky1sbloo.ocjsys.auth.dto.RegisterRequest;
 import com.sky1sbloo.ocjsys.auth.role.Role;
-import com.sky1sbloo.ocjsys.auth.role.RoleRepository;
 import com.sky1sbloo.ocjsys.auth.role.Roles;
-import com.sky1sbloo.ocjsys.userprofile.UserProfile;
-import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -26,8 +22,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import tools.jackson.databind.ObjectMapper;
 
 import java.net.URI;
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -36,47 +30,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 public class LoginRegistrationTests {
     private final UserInfoRepository userInfoRepository;
-    private final UserProfileRepository userProfileRepository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final SampleUsers sampleUsers;
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
 
-    private final LoginRequest adminLogin;
-    private final LoginRequest userLogin;
-
     @Autowired
-    public LoginRegistrationTests(UserInfoRepository userInfoRepository, UserProfileRepository userProfileRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, MockMvc mockMvc, ObjectMapper objectMapper) {
+    public LoginRegistrationTests(UserInfoRepository userInfoRepository,
+                                  SampleUsers sampleUsers,
+                                  MockMvc mockMvc,
+                                  ObjectMapper objectMapper) {
         this.userInfoRepository = userInfoRepository;
-        this.userProfileRepository = userProfileRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.sampleUsers = sampleUsers;
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
-
-        adminLogin = LoginRequest.builder()
-                .username("admin")
-                .password("password@1234").build();
-
-        userLogin = LoginRequest.builder()
-                .username("user")
-                .password("1234").build();
     }
 
     @BeforeEach
     void setup() {
-        Role adminRole = roleRepository.findByName(Roles.ADMIN)
-                .orElseGet(() -> roleRepository.save(new Role(null, Roles.ADMIN, new HashSet<>())));
-        Role userRole = roleRepository.findByName(Roles.USER)
-                .orElseGet(() -> roleRepository.save(new Role(null, Roles.USER, new HashSet<>())));
-        createAdminUser(adminRole);
-        createNormalUser(userRole);
+        sampleUsers.createUserAdmin();
     }
 
     @Test
-    @Transactional
     void registerReturnsSuccess() throws Exception {
         String username = "test_user";
         RegisterRequest registerRequest = RegisterRequest.builder()
@@ -90,13 +67,12 @@ public class LoginRegistrationTests {
     }
 
     @Test
-    @Transactional
     void loginSuccessReturnsTokens() throws Exception {
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userLogin)))
+                        .content(objectMapper.writeValueAsString(sampleUsers.getUserLogin())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value(userLogin.getUsername()));
+                .andExpect(jsonPath("$.username").value(sampleUsers.getUserLogin().getUsername()));
     }
 
     @Test
@@ -112,13 +88,12 @@ public class LoginRegistrationTests {
     }
 
     @Test
-    @Transactional
     void notEnoughAuthorityShouldFail() throws Exception {
         MvcResult result = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userLogin)))
+                        .content(objectMapper.writeValueAsString(sampleUsers.getUserLogin())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value(userLogin.getUsername()))
+                .andExpect(jsonPath("$.username").value(sampleUsers.getUserLogin().getUsername()))
                 .andReturn();
 
         LoginResponse loginResponse = objectMapper.readValue(
@@ -130,10 +105,9 @@ public class LoginRegistrationTests {
     }
 
     @Test
-    @Transactional
     void adminShouldUpdateUserRole() throws Exception {
-        LoginResponse response = loginAndGetResponse(adminLogin);
-        LoginResponse userResponse = loginAndGetResponse(userLogin);
+        LoginResponse response = loginAndGetResponse(sampleUsers.getAdminLogin());
+        LoginResponse userResponse = loginAndGetResponse(sampleUsers.getUserLogin());
         URI updateRole = UriComponentsBuilder.fromUriString("/auth/role")
                 .queryParam("id", userResponse.getId())
                 .queryParam("roles", "ADMIN").build().toUri();
@@ -142,7 +116,7 @@ public class LoginRegistrationTests {
                 .andExpect(status().isNoContent());
         mockMvc.perform(post("/auth/logout").header("Authorization", authorizationHeader));
 
-        AuthUser user = userInfoRepository.findByUsername(userLogin.getUsername())
+        AuthUser user = userInfoRepository.findByUsername(sampleUsers.getUserLogin().getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException(""));
         assertThat(user.getRoles().stream().map(Role::getName).toList())
                 .contains(Roles.ADMIN);
@@ -157,35 +131,5 @@ public class LoginRegistrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk()).andReturn();
         return objectMapper.readValue(result.getResponse().getContentAsString(), LoginResponse.class);
-    }
-
-    private void createAdminUser(Role adminRole) {
-        if (userInfoRepository.existsByUsername(userLogin.getUsername())) {
-            return;
-        }
-
-        AuthUser newAdminUser = AuthUser.builder()
-                .username(adminLogin.getUsername())
-                .password(passwordEncoder.encode(adminLogin.getPassword()))
-                .roles(Set.of(adminRole))
-                .build();
-        AuthUser adminUser = userInfoRepository.save(newAdminUser);
-        UserProfile adminProfile = UserProfile.builder()
-                .name("Administrator")
-                .authUser(adminUser).build();
-        userProfileRepository.save(adminProfile);
-    }
-
-    private void createNormalUser(Role userRole) {
-        if (userInfoRepository.existsByUsername(userLogin.getUsername())) {
-            return;
-        }
-
-        AuthUser testUser = AuthUser.builder()
-                .username(userLogin.getUsername())
-                .password(passwordEncoder.encode(userLogin.getPassword()))
-                .roles(Set.of(userRole))
-                .build();
-        userInfoRepository.save(testUser);
     }
 }
