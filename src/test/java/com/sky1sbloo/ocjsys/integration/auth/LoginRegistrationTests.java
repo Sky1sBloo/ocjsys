@@ -1,6 +1,6 @@
 package com.sky1sbloo.ocjsys.integration.auth;
 
-import com.sky1sbloo.ocjsys.auth.UserInfo;
+import com.sky1sbloo.ocjsys.auth.AuthUser;
 import com.sky1sbloo.ocjsys.auth.UserInfoRepository;
 import com.sky1sbloo.ocjsys.auth.dto.LoginRequest;
 import com.sky1sbloo.ocjsys.auth.dto.LoginResponse;
@@ -147,7 +147,7 @@ public class LoginRegistrationTests {
                 .andExpect(status().isNoContent());
         mockMvc.perform(post("/auth/logout").header("Authorization", authorizationHeader));
 
-        UserInfo user = userInfoRepository.findByUsername(userLogin.getUsername())
+        AuthUser user = userInfoRepository.findByUsername(userLogin.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException(""));
         assertThat(user.getRoles().stream().map(Role::getName).toList())
                 .contains(Roles.ADMIN);
@@ -169,7 +169,7 @@ public class LoginRegistrationTests {
             return;
         }
 
-        UserInfo adminUser = UserInfo.builder()
+        AuthUser adminUser = AuthUser.builder()
                 .username(adminLogin.getUsername())
                 .password(passwordEncoder.encode(adminLogin.getPassword()))
                 .roles(Set.of(adminRole))
@@ -182,7 +182,7 @@ public class LoginRegistrationTests {
             return;
         }
 
-        UserInfo testUser = UserInfo.builder()
+        AuthUser testUser = AuthUser.builder()
                 .username(userLogin.getUsername())
                 .password(passwordEncoder.encode(userLogin.getPassword()))
                 .roles(Set.of(userRole))

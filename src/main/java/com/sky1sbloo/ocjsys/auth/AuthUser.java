@@ -2,6 +2,7 @@ package com.sky1sbloo.ocjsys.auth;
 
 import com.sky1sbloo.ocjsys.auth.role.Permission;
 import com.sky1sbloo.ocjsys.auth.role.Role;
+import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +24,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-public class UserInfo implements UserDetails {
+public class AuthUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -37,6 +38,8 @@ public class UserInfo implements UserDetails {
         joinColumns = @JoinColumn(name="user_id"),
         inverseJoinColumns = @JoinColumn(name="role_id"))
     private Set<Role> roles = new HashSet<>();
+    @OneToOne(mappedBy = "authUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private UserProfile userProfile;
 
     @Override
     public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {

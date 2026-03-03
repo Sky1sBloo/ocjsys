@@ -1,6 +1,6 @@
 package com.sky1sbloo.ocjsys.userprofile;
 
-import com.sky1sbloo.ocjsys.auth.UserInfo;
+import com.sky1sbloo.ocjsys.auth.AuthUser;
 import com.sky1sbloo.ocjsys.auth.UserInfoRepository;
 import com.sky1sbloo.ocjsys.userprofile.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -15,14 +15,15 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-public class UserInfoController {
+public class UserProfileController {
     private final UserInfoRepository userInfoRepository;
 
     @GetMapping("/profile")
-    public ResponseEntity<UserInfoDto> getUserInfo(@AuthenticationPrincipal UserInfo user) {
-        var userInfo = UserInfoDto.builder()
+    public ResponseEntity<UserProfileDto> getUserInfo(@AuthenticationPrincipal AuthUser user) {
+        var userInfo = UserProfileDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
+                .name(user.getUserProfile().getName())
                 .roles(user.getRoles().stream()
                         .map(role -> role.getName().name()).collect(Collectors.toList())).build();
         return ResponseEntity.ok().body(userInfo);
@@ -31,11 +32,11 @@ public class UserInfoController {
     @GetMapping("/")
     @PreAuthorize("hasAuthority('READ_USERS_INFO')")
     public ResponseEntity<UserListDto> getUsers() {
-        List<UserInfo> userInfo = userInfoRepository.findAll();
-        List<UserInfoDto> userInfoDto = new LinkedList<>();
-        for (UserInfo user : userInfo) {
+        List<AuthUser> authUser = userInfoRepository.findAll();
+        List<UserProfileDto> userInfoDto = new LinkedList<>();
+        for (AuthUser user : authUser) {
             userInfoDto.add(
-                    UserInfoDto.builder()
+                    UserProfileDto.builder()
                             .id(user.getId())
                             .username(user.getUsername())
                             .roles(user.getRoles().stream()

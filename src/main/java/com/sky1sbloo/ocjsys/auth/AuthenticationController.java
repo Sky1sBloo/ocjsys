@@ -51,7 +51,7 @@ public class AuthenticationController {
             return new ResponseEntity<Object>(map, HttpStatus.UNAUTHORIZED);
         }
         SecurityContextHolder.getContext().setAuthentication(auth);
-        UserInfo userDetails = (UserInfo) auth.getPrincipal();
+        AuthUser userDetails = (AuthUser) auth.getPrincipal();
         assert userDetails != null;
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).toList();
@@ -72,7 +72,7 @@ public class AuthenticationController {
         if (userInfoRepository.existsByUsername(userRegisterDto.getUsername())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        UserInfo newUser = new UserInfo();
+        AuthUser newUser = new AuthUser();
         newUser.setUsername(userRegisterDto.getUsername());
         newUser.setPassword(passwordEncoder.encode(userRegisterDto.getPassword()));
 
@@ -81,7 +81,7 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Cannot register default role");
         }
         newUser.setRoles(Set.of(defaultRole.get()));
-        UserInfo user = userInfoRepository.save(newUser);
+        AuthUser user = userInfoRepository.save(newUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new RegisterResponse(user.getId(), user.getUsername())
         );
@@ -138,7 +138,7 @@ public class AuthenticationController {
                         .orElseThrow(() -> new EntityNotFoundException("Cannot find role: " + roleEnum.name()));
                 roles.add(role);
             }
-            Optional<UserInfo> userInfo = userInfoRepository.findById(userId);
+            Optional<AuthUser> userInfo = userInfoRepository.findById(userId);
             if (userInfo.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find user");
             }

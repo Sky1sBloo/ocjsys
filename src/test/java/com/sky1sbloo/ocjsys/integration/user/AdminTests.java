@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.sky1sbloo.ocjsys.auth.UserInfo;
+import com.sky1sbloo.ocjsys.auth.AuthUser;
 import com.sky1sbloo.ocjsys.auth.UserInfoRepository;
 import com.sky1sbloo.ocjsys.auth.dto.LoginRequest;
 import com.sky1sbloo.ocjsys.auth.dto.LoginResponse;
@@ -109,7 +109,7 @@ public class AdminTests {
             return;
         }
 
-        UserInfo adminUser = UserInfo.builder()
+        AuthUser adminUser = AuthUser.builder()
                 .username(adminLogin.getUsername())
                 .password(passwordEncoder.encode(adminLogin.getPassword()))
                 .roles(Set.of(adminRole))
@@ -122,7 +122,7 @@ public class AdminTests {
             return;
         }
 
-        UserInfo testUser = UserInfo.builder()
+        AuthUser testUser = AuthUser.builder()
                 .username(userLogin.getUsername())
                 .password(passwordEncoder.encode(userLogin.getPassword()))
                 .roles(Set.of(userRole))
@@ -131,13 +131,11 @@ public class AdminTests {
     }
 
     private String loginAndGetToken(LoginRequest request) throws Exception {
-        MvcResult result = mockMvc.perform(post("/login")
+        MvcResult result = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk()).andReturn();
         LoginResponse response = objectMapper.readValue(result.getResponse().getContentAsString(), LoginResponse.class);
         return "Bearer " + response.getJwtToken();
     }
-
-
 }

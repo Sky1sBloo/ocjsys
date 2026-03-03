@@ -1,6 +1,6 @@
 package com.sky1sbloo.ocjsys.data;
 
-import com.sky1sbloo.ocjsys.auth.UserInfo;
+import com.sky1sbloo.ocjsys.auth.AuthUser;
 import com.sky1sbloo.ocjsys.auth.UserInfoRepository;
 import com.sky1sbloo.ocjsys.auth.role.Role;
 import com.sky1sbloo.ocjsys.auth.role.RoleRepository;
@@ -40,7 +40,7 @@ public class DevDataInitializer implements DataInitializer {
     public void initialize() {
         Role role = roleRepository.findByName(Roles.ADMIN).orElseThrow(
                 () -> new IllegalStateException("Role admin does not exist. Ensure bean is initialized in order"));
-        UserInfo adminUser = UserInfo.builder()
+        AuthUser adminUser = AuthUser.builder()
                 .username(devAdminUsername)
                 .password(passwordEncoder.encode(devAdminPassword))
                 .roles(Set.of(role))
