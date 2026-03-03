@@ -104,8 +104,6 @@ public class AdminTests {
                 .andExpect(status().isForbidden());
     }
 
-
-
     private void createAdminUser(Role adminRole) {
         if (userInfoRepository.existsByUsername(userLogin.getUsername())) {
             return;
