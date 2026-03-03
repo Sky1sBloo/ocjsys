@@ -1,10 +1,8 @@
 package com.sky1sbloo.ocjsys.integration.user;
 
-import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,18 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.sky1sbloo.ocjsys.auth.UserInfo;
 import com.sky1sbloo.ocjsys.auth.UserInfoRepository;
@@ -110,27 +104,7 @@ public class AdminTests {
                 .andExpect(status().isForbidden());
     }
 
-    @Test
-    @Transactional
-    void adminShouldUpdateUserRole() throws Exception {
-        LoginResponse response = loginAndGetResponse(adminLogin);
-        LoginResponse userResponse = loginAndGetResponse(userLogin);
-        URI updateRole = UriComponentsBuilder.fromUriString("/role")
-                .queryParam("id", userResponse.getId())
-                .queryParam("roles", "ADMIN").build().toUri();
-        String authorizationHeader = "Bearer " + response.getJwtToken();
-        mockMvc.perform(put(updateRole).header("Authorization", authorizationHeader))
-                .andExpect(status().isNoContent());
-        mockMvc.perform(post("/logout").header("Authorization", authorizationHeader));
 
-        UserInfo user = userInfoRepository.findByUsername(userLogin.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException(""));
-        assertThat(user.getRoles().stream().map(Role::getName).toList())
-                .contains(Roles.ADMIN);
-
-        mockMvc.perform(get("/").header("Authorization", "Bearer " + userResponse.getJwtToken()))
-                .andExpect(status().isOk());
-    }
 
     private void createAdminUser(Role adminRole) {
         if (userInfoRepository.existsByUsername(userLogin.getUsername())) {
@@ -167,11 +141,5 @@ public class AdminTests {
         return "Bearer " + response.getJwtToken();
     }
 
-    private LoginResponse loginAndGetResponse(LoginRequest request) throws Exception {
-        MvcResult result = mockMvc.perform(post("/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk()).andReturn();
-        return objectMapper.readValue(result.getResponse().getContentAsString(), LoginResponse.class);
-    }
+
 }
