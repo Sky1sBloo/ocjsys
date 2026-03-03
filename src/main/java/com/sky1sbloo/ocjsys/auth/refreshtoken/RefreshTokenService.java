@@ -1,6 +1,6 @@
 package com.sky1sbloo.ocjsys.auth.refreshtoken;
 
-import com.sky1sbloo.ocjsys.auth.UserInfoRepository;
+import com.sky1sbloo.ocjsys.auth.AuthUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,11 +16,11 @@ public class RefreshTokenService {
     private Long refreshExpirationDays;
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final UserInfoRepository userInfoRepository;
+    private final AuthUserRepository authUserRepository;
 
     public RefreshToken createRefreshToken(String username) {
         var token = new RefreshToken();
-        token.setUser(userInfoRepository.findByUsername(username).orElseThrow());
+        token.setUser(authUserRepository.findByUsername(username).orElseThrow());
         token.setExpiryDate(Instant.now().plus(refreshExpirationDays, ChronoUnit.DAYS));
         token.setToken(UUID.randomUUID().toString());
         return refreshTokenRepository.save(token);

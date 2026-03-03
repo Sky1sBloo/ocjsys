@@ -1,7 +1,7 @@
 package com.sky1sbloo.ocjsys.integration.auth;
 
 import com.sky1sbloo.ocjsys.auth.AuthUser;
-import com.sky1sbloo.ocjsys.auth.UserInfoRepository;
+import com.sky1sbloo.ocjsys.auth.AuthUserRepository;
 import com.sky1sbloo.ocjsys.auth.dto.LoginRequest;
 import com.sky1sbloo.ocjsys.auth.dto.RegisterRequest;
 import com.sky1sbloo.ocjsys.auth.role.Role;
@@ -23,7 +23,7 @@ import java.util.Set;
 @Service
 @Profile("test")
 public class SampleUsers {
-    private final UserInfoRepository userInfoRepository;
+    private final AuthUserRepository authUserRepository;
     private final UserProfileRepository userProfileRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
@@ -35,8 +35,8 @@ public class SampleUsers {
     private final LoginRequest userLogin;
 
     @Autowired
-    public SampleUsers(UserInfoRepository userInfoRepository, UserProfileRepository userProfileRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
-        this.userInfoRepository = userInfoRepository;
+    public SampleUsers(AuthUserRepository authUserRepository, UserProfileRepository userProfileRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+        this.authUserRepository = authUserRepository;
         this.userProfileRepository = userProfileRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -80,7 +80,7 @@ public class SampleUsers {
     }
 
     public void createUser(RegisterRequest registerRequest, Set<Role> roles) {
-        if (userInfoRepository.existsByUsername(registerRequest.getUsername())) {
+        if (authUserRepository.existsByUsername(registerRequest.getUsername())) {
             return;
         }
 
@@ -89,12 +89,12 @@ public class SampleUsers {
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .roles(roles)
                 .build();
-        AuthUser user = userInfoRepository.save(newUser);
+        AuthUser user = authUserRepository.save(newUser);
         UserProfile adminProfile = UserProfile.builder()
                 .name(registerRequest.getName())
                 .authUser(user).build();
         userProfileRepository.save(adminProfile);
         user.setUserProfile(adminProfile);
-        userInfoRepository.save(user);
+        authUserRepository.save(user);
     }
 }

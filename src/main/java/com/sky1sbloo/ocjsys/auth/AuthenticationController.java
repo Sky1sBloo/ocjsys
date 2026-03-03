@@ -35,7 +35,7 @@ public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
-    private final UserInfoRepository userInfoRepository;
+    private final AuthUserRepository authUserRepository;
     private final UserProfileRepository userProfileRepository;
     private final RoleRepository roleRepository;
     private final RefreshTokenService refreshTokenService;
@@ -72,7 +72,7 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest userRegisterDto) {
-        if (userInfoRepository.existsByUsername(userRegisterDto.getUsername())) {
+        if (authUserRepository.existsByUsername(userRegisterDto.getUsername())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
         AuthUser newUser = new AuthUser();
@@ -84,7 +84,7 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Cannot register default role");
         }
         newUser.setRoles(Set.of(defaultRole.get()));
-        AuthUser user = userInfoRepository.save(newUser);
+        AuthUser user = authUserRepository.save(newUser);
         UserProfile newUserProfile = UserProfile.builder()
                 .name(userRegisterDto.getName())
                 .authUser(user).build();
@@ -145,12 +145,12 @@ public class AuthenticationController {
                         .orElseThrow(() -> new EntityNotFoundException("Cannot find role: " + roleEnum.name()));
                 roles.add(role);
             }
-            Optional<AuthUser> userInfo = userInfoRepository.findById(userId);
+            Optional<AuthUser> userInfo = authUserRepository.findById(userId);
             if (userInfo.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find user");
             }
             userInfo.get().setRoles(roles);
-            userInfoRepository.save(userInfo.get());
+            authUserRepository.save(userInfo.get());
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid role name");

@@ -1,7 +1,7 @@
 package com.sky1sbloo.ocjsys.userprofile;
 
 import com.sky1sbloo.ocjsys.auth.AuthUser;
-import com.sky1sbloo.ocjsys.auth.UserInfoRepository;
+import com.sky1sbloo.ocjsys.auth.AuthUserRepository;
 import com.sky1sbloo.ocjsys.userprofile.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 public class UserProfileController {
-    private final UserInfoRepository userInfoRepository;
+    private final AuthUserRepository authUserRepository;
 
     @GetMapping("/profile")
     public ResponseEntity<UserProfileDto> getUserInfo(@AuthenticationPrincipal AuthUser user) {
@@ -32,7 +32,7 @@ public class UserProfileController {
     @GetMapping("/")
     @PreAuthorize("hasAuthority('READ_USERS_INFO')")
     public ResponseEntity<UserListDto> getUsers() {
-        List<AuthUser> authUser = userInfoRepository.findAll();
+        List<AuthUser> authUser = authUserRepository.findAll();
         List<UserProfileDto> userInfoDto = new LinkedList<>();
         for (AuthUser user : authUser) {
             userInfoDto.add(

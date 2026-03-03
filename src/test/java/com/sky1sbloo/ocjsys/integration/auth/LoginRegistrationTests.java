@@ -1,7 +1,7 @@
 package com.sky1sbloo.ocjsys.integration.auth;
 
 import com.sky1sbloo.ocjsys.auth.AuthUser;
-import com.sky1sbloo.ocjsys.auth.UserInfoRepository;
+import com.sky1sbloo.ocjsys.auth.AuthUserRepository;
 import com.sky1sbloo.ocjsys.auth.dto.LoginRequest;
 import com.sky1sbloo.ocjsys.auth.dto.LoginResponse;
 import com.sky1sbloo.ocjsys.auth.dto.RegisterRequest;
@@ -32,17 +32,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @Transactional
 public class LoginRegistrationTests {
-    private final UserInfoRepository userInfoRepository;
+    private final AuthUserRepository authUserRepository;
     private final SampleUsers sampleUsers;
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public LoginRegistrationTests(UserInfoRepository userInfoRepository,
+    public LoginRegistrationTests(AuthUserRepository authUserRepository,
                                   SampleUsers sampleUsers,
                                   MockMvc mockMvc,
                                   ObjectMapper objectMapper) {
-        this.userInfoRepository = userInfoRepository;
+        this.authUserRepository = authUserRepository;
         this.sampleUsers = sampleUsers;
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
@@ -116,7 +116,7 @@ public class LoginRegistrationTests {
                 .andExpect(status().isNoContent());
         mockMvc.perform(post("/auth/logout").header("Authorization", authorizationHeader));
 
-        AuthUser user = userInfoRepository.findByUsername(sampleUsers.getUserLogin().getUsername())
+        AuthUser user = authUserRepository.findByUsername(sampleUsers.getUserLogin().getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException(""));
         assertThat(user.getRoles().stream().map(Role::getName).toList())
                 .contains(Roles.ADMIN);
