@@ -8,24 +8,25 @@ import com.sky1sbloo.ocjsys.auth.refreshtoken.RefreshTokenService;
 import com.sky1sbloo.ocjsys.auth.role.Role;
 import com.sky1sbloo.ocjsys.auth.role.RoleRepository;
 import com.sky1sbloo.ocjsys.auth.role.Roles;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 @RequiredArgsConstructor
+@Slf4j
 @RestController
 public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
@@ -118,5 +119,36 @@ public class AuthenticationController {
                 .orElse(
                         ResponseEntity.badRequest().body("Invalid refresh token")
                 );
+    }
+
+    @PutMapping("/role")
+    @PreAuthorize("hasAuthority('CHANGE_USER_ROLE')")
+    public ResponseEntity<?> setUserRole(@RequestParam(value = "id") long userId,
+                                         @RequestParam(value = "roles") List<String> roleNames) {
+        Set<Roles> rolesEnum = new HashSet<>();
+        try {
+            for (String roleName : roleNames) {
+                rolesEnum.add(Roles.valueOf(roleName));
+            }
+
+            Set<Role> roles = new HashSet<>();
+            for (Roles roleEnum : rolesEnum) {
+                Role role = roleRepository.findByName(roleEnum)
+                        .orElseThrow(() -> new EntityNotFoundException("Cannot find role: " + roleEnum.name()));
+                roles.add(role);
+            }
+            Optional<UserInfo> userInfo = userInfoRepository.findById(userId);
+            if (userInfo.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find user");
+            }
+            userInfo.get().setRoles(roles);
+            userInfoRepository.save(userInfo.get());
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid role name");
+        } catch (EntityNotFoundException ex) {
+            log.error(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role not found");
+        }
     }
 }

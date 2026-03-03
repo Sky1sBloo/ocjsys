@@ -1,4 +1,4 @@
-package com.sky1sbloo.ocjsys.user.dto;
+package com.sky1sbloo.ocjsys.userprofile.dto;
 
 import java.util.List;
 
