@@ -8,6 +8,8 @@ import com.sky1sbloo.ocjsys.auth.refreshtoken.RefreshTokenService;
 import com.sky1sbloo.ocjsys.auth.role.Role;
 import com.sky1sbloo.ocjsys.auth.role.RoleRepository;
 import com.sky1sbloo.ocjsys.auth.role.Roles;
+import com.sky1sbloo.ocjsys.userprofile.UserProfile;
+import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ public class AuthenticationController {
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
     private final UserInfoRepository userInfoRepository;
+    private final UserProfileRepository userProfileRepository;
     private final RoleRepository roleRepository;
     private final RefreshTokenService refreshTokenService;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -82,6 +85,10 @@ public class AuthenticationController {
         }
         newUser.setRoles(Set.of(defaultRole.get()));
         AuthUser user = userInfoRepository.save(newUser);
+        UserProfile newUserProfile = UserProfile.builder()
+                .name(userRegisterDto.getName())
+                .authUser(user).build();
+        userProfileRepository.save(newUserProfile);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new RegisterResponse(user.getId(), user.getUsername())
         );
