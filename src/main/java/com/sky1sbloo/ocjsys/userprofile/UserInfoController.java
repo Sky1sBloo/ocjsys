@@ -2,7 +2,6 @@ package com.sky1sbloo.ocjsys.userprofile;
 
 import com.sky1sbloo.ocjsys.auth.UserInfo;
 import com.sky1sbloo.ocjsys.auth.UserInfoRepository;
-import com.sky1sbloo.ocjsys.auth.role.RoleRepository;
 import com.sky1sbloo.ocjsys.userprofile.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
