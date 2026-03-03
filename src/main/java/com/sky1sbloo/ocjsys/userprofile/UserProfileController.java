@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
 @RestController
 @RequiredArgsConstructor
 public class UserProfileController {
@@ -25,7 +23,8 @@ public class UserProfileController {
                 .username(user.getUsername())
                 .name(user.getUserProfile().getName())
                 .roles(user.getRoles().stream()
-                        .map(role -> role.getName().name()).collect(Collectors.toList())).build();
+                        .map(role -> role.getName().name()).toList())
+                .build();
         return ResponseEntity.ok().body(userInfo);
     }
 
@@ -40,7 +39,7 @@ public class UserProfileController {
                             .id(user.getId())
                             .username(user.getUsername())
                             .roles(user.getRoles().stream()
-                                    .map(role -> role.getName().name()).collect(Collectors.toList())).build()
+                                    .map(role -> role.getName().name()).toList()).build()
             );
         }
         var userListDto = new UserListDto(userInfoDto);
