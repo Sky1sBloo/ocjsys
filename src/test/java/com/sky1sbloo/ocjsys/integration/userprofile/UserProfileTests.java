@@ -1,4 +1,4 @@
-package com.sky1sbloo.ocjsys.integration.user;
+package com.sky1sbloo.ocjsys.integration.userprofile;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -36,7 +36,7 @@ import tools.jackson.databind.ObjectMapper;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-public class AdminTests {
+public class UserProfileTests {
     private final UserInfoRepository userInfoRepository;
     private final UserProfileRepository userProfileRepository;
     private final RoleRepository roleRepository;
@@ -50,11 +50,11 @@ public class AdminTests {
     private final LoginRequest userLogin;
 
     @Autowired
-    public AdminTests(UserInfoRepository userInfoRepository, UserProfileRepository userProfileRepository,
-                      RoleRepository roleRepository,
-                      PasswordEncoder passwordEncoder, RefreshTokenRepository refreshTokenRepository,
-                      MockMvc mockMvc,
-                      ObjectMapper objectMapper) {
+    public UserProfileTests(UserInfoRepository userInfoRepository, UserProfileRepository userProfileRepository,
+                            RoleRepository roleRepository,
+                            PasswordEncoder passwordEncoder, RefreshTokenRepository refreshTokenRepository,
+                            MockMvc mockMvc,
+                            ObjectMapper objectMapper) {
         this.userInfoRepository = userInfoRepository;
         this.userProfileRepository = userProfileRepository;
         this.roleRepository = roleRepository;
@@ -93,6 +93,14 @@ public class AdminTests {
         mockMvc.perform(get("/profile").header("Authorization", authorizationHeader))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value(adminLogin.getUsername()));
+    }
+
+    @Test
+    void userShouldReadProfile() throws Exception {
+        String authorizationHeader = loginAndGetToken(userLogin);
+        mockMvc.perform(get("/profile").header("Authorization", authorizationHeader))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value(userLogin.getUsername()));
     }
 
     @Test
