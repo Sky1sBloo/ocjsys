@@ -52,7 +52,9 @@ public class DevDataInitializer implements DataInitializer {
         AuthUser adminUser = userInfoRepository.save(newAdminUser);
         UserProfile adminProfile = UserProfile.builder()
                 .name("Administrator")
-                .id(adminUser.getId()).build();
+                .authUser(adminUser).build();
         userProfileRepository.save(adminProfile);
+        adminUser.setUserProfile(adminProfile);
+        userInfoRepository.save(adminUser);
     }
 }
