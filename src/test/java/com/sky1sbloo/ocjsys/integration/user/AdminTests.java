@@ -3,6 +3,8 @@ package com.sky1sbloo.ocjsys.integration.user;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sky1sbloo.ocjsys.userprofile.UserProfile;
+import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -35,6 +38,7 @@ import tools.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 public class AdminTests {
     private final UserInfoRepository userInfoRepository;
+    private final UserProfileRepository userProfileRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -46,12 +50,13 @@ public class AdminTests {
     private final LoginRequest userLogin;
 
     @Autowired
-    public AdminTests(UserInfoRepository userInfoRepository,
+    public AdminTests(UserInfoRepository userInfoRepository, UserProfileRepository userProfileRepository,
                       RoleRepository roleRepository,
                       PasswordEncoder passwordEncoder, RefreshTokenRepository refreshTokenRepository,
                       MockMvc mockMvc,
                       ObjectMapper objectMapper) {
         this.userInfoRepository = userInfoRepository;
+        this.userProfileRepository = userProfileRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.refreshTokenRepository = refreshTokenRepository;
@@ -109,12 +114,16 @@ public class AdminTests {
             return;
         }
 
-        AuthUser adminUser = AuthUser.builder()
+        AuthUser newAdminUser = AuthUser.builder()
                 .username(adminLogin.getUsername())
                 .password(passwordEncoder.encode(adminLogin.getPassword()))
                 .roles(Set.of(adminRole))
                 .build();
-        userInfoRepository.save(adminUser);
+        AuthUser adminUser = userInfoRepository.save(newAdminUser);
+        UserProfile adminProfile = UserProfile.builder()
+                .name("Administrator")
+                .authUser(adminUser).build();
+        userProfileRepository.save(adminProfile);
     }
 
     private void createNormalUser(Role userRole) {
@@ -122,12 +131,16 @@ public class AdminTests {
             return;
         }
 
-        AuthUser testUser = AuthUser.builder()
+        AuthUser newNormalUser = AuthUser.builder()
                 .username(userLogin.getUsername())
                 .password(passwordEncoder.encode(userLogin.getPassword()))
                 .roles(Set.of(userRole))
                 .build();
-        userInfoRepository.save(testUser);
+        AuthUser normalUser= userInfoRepository.save(newNormalUser);
+        UserProfile adminProfile = UserProfile.builder()
+                .name("Administrator")
+                .authUser(normalUser).build();
+        userProfileRepository.save(adminProfile);
     }
 
     private String loginAndGetToken(LoginRequest request) throws Exception {

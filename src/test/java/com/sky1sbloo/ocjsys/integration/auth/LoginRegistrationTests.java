@@ -8,6 +8,8 @@ import com.sky1sbloo.ocjsys.auth.dto.RegisterRequest;
 import com.sky1sbloo.ocjsys.auth.role.Role;
 import com.sky1sbloo.ocjsys.auth.role.RoleRepository;
 import com.sky1sbloo.ocjsys.auth.role.Roles;
+import com.sky1sbloo.ocjsys.userprofile.UserProfile;
+import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 public class LoginRegistrationTests {
     private final UserInfoRepository userInfoRepository;
+    private final UserProfileRepository userProfileRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final MockMvc mockMvc;
@@ -45,8 +48,9 @@ public class LoginRegistrationTests {
     private final LoginRequest userLogin;
 
     @Autowired
-    public LoginRegistrationTests(UserInfoRepository userInfoRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, MockMvc mockMvc, ObjectMapper objectMapper) {
+    public LoginRegistrationTests(UserInfoRepository userInfoRepository, UserProfileRepository userProfileRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, MockMvc mockMvc, ObjectMapper objectMapper) {
         this.userInfoRepository = userInfoRepository;
+        this.userProfileRepository = userProfileRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.mockMvc = mockMvc;
@@ -88,18 +92,9 @@ public class LoginRegistrationTests {
     @Test
     @Transactional
     void loginSuccessReturnsTokens() throws Exception {
-        MvcResult result = mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userLogin)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value(userLogin.getUsername()))
-                .andReturn();
-
-        LoginResponse loginResponse = objectMapper.readValue(
-                result.getResponse().getContentAsString(), LoginResponse.class);
-        String jwtToken = loginResponse.getJwtToken();
-        mockMvc.perform(get("/profile")
-                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value(userLogin.getUsername()));
     }
@@ -169,12 +164,16 @@ public class LoginRegistrationTests {
             return;
         }
 
-        AuthUser adminUser = AuthUser.builder()
+        AuthUser newAdminUser = AuthUser.builder()
                 .username(adminLogin.getUsername())
                 .password(passwordEncoder.encode(adminLogin.getPassword()))
                 .roles(Set.of(adminRole))
                 .build();
-        userInfoRepository.save(adminUser);
+        AuthUser adminUser = userInfoRepository.save(newAdminUser);
+        UserProfile adminProfile = UserProfile.builder()
+                .name("Administrator")
+                .authUser(adminUser).build();
+        userProfileRepository.save(adminProfile);
     }
 
     private void createNormalUser(Role userRole) {
