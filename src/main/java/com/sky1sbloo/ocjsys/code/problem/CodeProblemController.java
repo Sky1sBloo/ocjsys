@@ -40,7 +40,7 @@ public class CodeProblemController {
     }
 
     @PostMapping
-    @PreAuthorize("#principal.username==#authUser.username")
+    @PreAuthorize("#principal.username==#authUser.username && hasAuthority('CREATE_CODE_PROBLEMS')")
     public ResponseEntity<CodeProblem> createProblem(
             @RequestBody CodeProblemCreateDto codeProblem,
             @AuthenticationPrincipal AuthUser authUser) {

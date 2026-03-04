@@ -42,12 +42,14 @@ public class DevDataInitializer implements DataInitializer {
     @Override
     @PostConstruct
     public void initialize() {
-        Role role = roleRepository.findByName(Roles.ADMIN).orElseThrow(
+        Role adminRole = roleRepository.findByName(Roles.ADMIN).orElseThrow(
                 () -> new IllegalStateException("Role admin does not exist. Ensure bean is initialized in order"));
+        Role userRole = roleRepository.findByName(Roles.USER).orElseThrow(
+                () -> new IllegalStateException("Role user does not exist. Ensure bean is initialized in order"));
         AuthUser newAdminUser = AuthUser.builder()
                 .username(devAdminUsername)
                 .password(passwordEncoder.encode(devAdminPassword))
-                .roles(Set.of(role))
+                .roles(Set.of(adminRole, userRole))
                 .build();
         AuthUser adminUser = authUserRepository.save(newAdminUser);
         UserProfile adminProfile = UserProfile.builder()

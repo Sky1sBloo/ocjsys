@@ -9,6 +9,7 @@ import com.sky1sbloo.ocjsys.auth.role.RoleRepository;
 import com.sky1sbloo.ocjsys.auth.role.Roles;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,7 +32,9 @@ public class SampleUsers {
     private static RegisterRequest adminRegister;
     private static RegisterRequest userRegister;
 
+    @Getter
     private final LoginRequest adminLogin;
+    @Getter
     private final LoginRequest userLogin;
 
     @Autowired
@@ -59,14 +62,6 @@ public class SampleUsers {
                 .build();
     }
 
-    public LoginRequest getAdminLogin() {
-        return adminLogin;
-    }
-
-    public LoginRequest getUserLogin() {
-        return userLogin;
-    }
-
     /**
      * Creates default user and admin
      */
@@ -75,7 +70,7 @@ public class SampleUsers {
                 .orElseGet(() -> roleRepository.save(new Role(null, Roles.ADMIN, new HashSet<>())));
         Role userRole = roleRepository.findByName(Roles.USER)
                 .orElseGet(() -> roleRepository.save(new Role(null, Roles.USER, new HashSet<>())));
-        createUser(adminRegister, Set.of(adminRole));
+        createUser(adminRegister, Set.of(adminRole, userRole));
         createUser(userRegister, Set.of(userRole));
     }
 
