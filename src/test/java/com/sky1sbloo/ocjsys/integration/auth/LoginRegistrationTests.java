@@ -99,7 +99,7 @@ public class LoginRegistrationTests {
         LoginResponse loginResponse = objectMapper.readValue(
                 result.getResponse().getContentAsString(), LoginResponse.class);
         String jwtToken = loginResponse.getJwtToken();
-        mockMvc.perform(get("/")
+        mockMvc.perform(get("/api/users/")
                         .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isForbidden());
     }
@@ -121,7 +121,7 @@ public class LoginRegistrationTests {
         assertThat(user.getRoles().stream().map(Role::getName).toList())
                 .contains(Roles.ADMIN);
 
-        mockMvc.perform(get("/").header("Authorization", "Bearer " + userResponse.getJwtToken()))
+        mockMvc.perform(get("/api/users/").header("Authorization", "Bearer " + userResponse.getJwtToken()))
                 .andExpect(status().isOk());
     }
 
