@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 .requestMatchers("/auth/refresh").authenticated()
                                 .requestMatchers("/auth/role").hasAuthority("CHANGE_USER_ROLE")
                                 .requestMatchers("/profile").authenticated()
+                                .requestMatchers("/api/code/**").authenticated()
                                 .anyRequest().authenticated())
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
