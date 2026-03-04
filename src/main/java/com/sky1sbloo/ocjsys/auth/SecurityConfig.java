@@ -35,13 +35,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers(HttpMethod.POST,
-                                        "/auth/login",
-                                        "/auth/register",
-                                        "/auth/logout").permitAll()
+                                        "/api/auth/login",
+                                        "/api/auth/register",
+                                        "/api/auth/logout").permitAll()
                                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                                .requestMatchers("/auth/refresh").authenticated()
-                                .requestMatchers("/auth/role").hasAuthority("CHANGE_USER_ROLE")
-                                .requestMatchers("/profile").authenticated()
+                                .requestMatchers("/api/auth/refresh").authenticated()
+                                .requestMatchers("/api/auth/role").hasAuthority("CHANGE_USER_ROLE")
+                                .requestMatchers("/api/users/profile").authenticated()
                                 .anyRequest().authenticated())
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

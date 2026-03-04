@@ -59,7 +59,7 @@ public class LoginRegistrationTests {
         RegisterRequest registerRequest = RegisterRequest.builder()
                 .username(username)
                 .password("password1234").build();
-        mockMvc.perform(post("/auth/register")
+        mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isCreated())
@@ -68,7 +68,7 @@ public class LoginRegistrationTests {
 
     @Test
     void loginSuccessReturnsTokens() throws Exception {
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(sampleUsers.getUserLogin())))
                 .andExpect(status().isOk())
@@ -81,7 +81,7 @@ public class LoginRegistrationTests {
                 .username("user")
                 .password("1234124")
                 .build();
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isUnauthorized());
@@ -89,7 +89,7 @@ public class LoginRegistrationTests {
 
     @Test
     void notEnoughAuthorityShouldFail() throws Exception {
-        MvcResult result = mockMvc.perform(post("/auth/login")
+        MvcResult result = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(sampleUsers.getUserLogin())))
                 .andExpect(status().isOk())
@@ -108,13 +108,13 @@ public class LoginRegistrationTests {
     void adminShouldUpdateUserRole() throws Exception {
         LoginResponse response = loginAndGetResponse(sampleUsers.getAdminLogin());
         LoginResponse userResponse = loginAndGetResponse(sampleUsers.getUserLogin());
-        URI updateRole = UriComponentsBuilder.fromUriString("/auth/role")
+        URI updateRole = UriComponentsBuilder.fromUriString("/api/auth/role")
                 .queryParam("id", userResponse.getId())
                 .queryParam("roles", "ADMIN").build().toUri();
         String authorizationHeader = "Bearer " + response.getJwtToken();
         mockMvc.perform(put(updateRole).header("Authorization", authorizationHeader))
                 .andExpect(status().isNoContent());
-        mockMvc.perform(post("/auth/logout").header("Authorization", authorizationHeader));
+        mockMvc.perform(post("/api/auth/logout").header("Authorization", authorizationHeader));
 
         AuthUser user = authUserRepository.findByUsername(sampleUsers.getUserLogin().getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException(""));
@@ -126,7 +126,7 @@ public class LoginRegistrationTests {
     }
 
     private LoginResponse loginAndGetResponse(LoginRequest request) throws Exception {
-        MvcResult result = mockMvc.perform(post("/auth/login")
+        MvcResult result = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk()).andReturn();
