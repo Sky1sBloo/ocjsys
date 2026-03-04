@@ -1,12 +1,13 @@
 package com.sky1sbloo.ocjsys.code.problem;
 
+import com.sky1sbloo.ocjsys.auth.AuthUser;
+import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemSearchFilterDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,5 +37,22 @@ public class CodeProblemController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @PostMapping
+    @PreAuthorize("#principal.username==#authUser.username")
+    public ResponseEntity<CodeProblem> createProblem(
+            @RequestBody CodeProblemCreateDto codeProblem,
+            @AuthenticationPrincipal AuthUser authUser) {
+        if (authUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        try {
+            codeProblemService.createProblem(codeProblem, authUser);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.noContent().build();
     }
 }

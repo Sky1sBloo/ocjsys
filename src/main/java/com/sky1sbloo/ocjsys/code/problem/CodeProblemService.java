@@ -1,5 +1,7 @@
 package com.sky1sbloo.ocjsys.code.problem;
 
+import com.sky1sbloo.ocjsys.auth.AuthUser;
+import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemSearchFilterDto;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
@@ -34,6 +36,18 @@ public class CodeProblemService {
             }
         }
         return codeProblems;
+    }
+
+    public void createProblem(CodeProblemCreateDto codeProblem, AuthUser authUser)
+            throws IllegalArgumentException {
+        var newProblem = new CodeProblem();
+        newProblem.setOwner(authUser.getUserProfile());
+        newProblem.setTitle(codeProblem.title());
+        newProblem.setDescription(codeProblem.description());
+        newProblem.setSolution(codeProblem.solution());
+        newProblem.setTags(codeProblem.tags());
+        newProblem.setDifficulty(Difficulties.valueOf(codeProblem.difficulty().toUpperCase()));
+        codeProblemRepository.save(newProblem);
     }
 
     public CodeProblemSearchFilter convertToFilter(CodeProblemSearchFilterDto filterDto) throws
