@@ -1,5 +1,6 @@
 package com.sky1sbloo.ocjsys.userprofile;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sky1sbloo.ocjsys.auth.AuthUser;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblem;
 import jakarta.persistence.*;
@@ -29,5 +30,6 @@ public class UserProfile {
 
     @Builder.Default
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<CodeProblem> codeProblems = new HashSet<>();
 }

@@ -18,12 +18,12 @@ import java.util.List;
 public class CodeProblemController {
     private final CodeProblemService codeProblemService;
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<CodeProblem>> getProblems(
-            @RequestParam String owner,
-            @RequestParam String title,
-            @RequestParam List<String> tags,
-            @RequestParam List<String> difficulties
+            @RequestParam(required = false) String owner,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) List<String> tags,
+            @RequestParam(required = false) List<String> difficulties
     ) {
         var codeProblemDto = CodeProblemSearchFilterDto.builder()
                 .ownerName(owner)
