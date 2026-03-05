@@ -29,20 +29,22 @@ public class CodeProblemTests {
     private final SampleUsers sampleUsers;
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
-
-    private Authenticator authenticator;
+    private final Authenticator authenticator;
 
     @Autowired
-    public CodeProblemTests(SampleUsers sampleUsers, MockMvc mockMvc, ObjectMapper objectMapper) {
+    public CodeProblemTests(SampleUsers sampleUsers,
+                            MockMvc mockMvc,
+                            ObjectMapper objectMapper,
+                            Authenticator authenticator) {
         this.sampleUsers = sampleUsers;
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
+        this.authenticator = authenticator;
     }
 
 
     @BeforeEach
     void setup() {
-        authenticator = new Authenticator(mockMvc, objectMapper);
         sampleUsers.createUserAdmin();
     }
 

@@ -2,7 +2,9 @@ package com.sky1sbloo.ocjsys.integration;
 
 import com.sky1sbloo.ocjsys.auth.dto.LoginRequest;
 import com.sky1sbloo.ocjsys.auth.dto.LoginResponse;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
@@ -13,6 +15,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Used to mock login
  */
+@Profile("test")
+@Component
 public class Authenticator {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
