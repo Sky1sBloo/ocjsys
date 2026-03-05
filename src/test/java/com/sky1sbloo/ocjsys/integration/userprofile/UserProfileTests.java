@@ -60,7 +60,7 @@ public class UserProfileTests {
     @Test
     void adminShouldReadProfile() throws Exception {
         String authorizationHeader = loginAndGetToken(sampleUsers.getAdminLogin());
-        mockMvc.perform(get("/profile").header("Authorization", authorizationHeader))
+        mockMvc.perform(get("/api/users/profile").header("Authorization", authorizationHeader))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value(sampleUsers.getAdminLogin().getUsername()));
     }
@@ -68,7 +68,7 @@ public class UserProfileTests {
     @Test
     void userShouldReadProfile() throws Exception {
         String authorizationHeader = loginAndGetToken(sampleUsers.getUserLogin());
-        mockMvc.perform(get("/profile").header("Authorization", authorizationHeader))
+        mockMvc.perform(get("/api/users/profile").header("Authorization", authorizationHeader))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value(sampleUsers.getUserLogin().getUsername()));
     }
@@ -76,19 +76,19 @@ public class UserProfileTests {
     @Test
     void adminShouldReadAllUserInfo() throws Exception {
         String authorizationHeader = loginAndGetToken(sampleUsers.getAdminLogin());
-        mockMvc.perform(get("/").header("Authorization", authorizationHeader))
+        mockMvc.perform(get("/api/users/").header("Authorization", authorizationHeader))
                 .andExpect(status().isOk());
     }
 
     @Test
     void nonAdminShouldNotReadUserInfo() throws Exception {
         String authorizationHeader = loginAndGetToken(sampleUsers.getUserLogin());
-        mockMvc.perform(get("/").header("Authorization", authorizationHeader))
+        mockMvc.perform(get("/api/users/").header("Authorization", authorizationHeader))
                 .andExpect(status().isForbidden());
     }
 
     private String loginAndGetToken(LoginRequest request) throws Exception {
-        MvcResult result = mockMvc.perform(post("/auth/login")
+        MvcResult result = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk()).andReturn();
