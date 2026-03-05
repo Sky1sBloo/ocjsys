@@ -23,7 +23,7 @@ public class Authenticator {
     }
 
     public String loginAndGetToken(LoginRequest request) throws Exception {
-        MvcResult result = mockMvc.perform(post("/auth/login")
+        MvcResult result = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk()).andReturn();
@@ -32,7 +32,7 @@ public class Authenticator {
     }
 
     public LoginResponse loginAndGetResponse(LoginRequest request) throws Exception {
-        MvcResult result = mockMvc.perform(post("/auth/login")
+        MvcResult result = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk()).andReturn();
