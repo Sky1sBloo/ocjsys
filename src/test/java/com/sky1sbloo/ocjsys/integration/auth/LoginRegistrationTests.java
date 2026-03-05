@@ -7,6 +7,7 @@ import com.sky1sbloo.ocjsys.auth.dto.LoginResponse;
 import com.sky1sbloo.ocjsys.auth.dto.RegisterRequest;
 import com.sky1sbloo.ocjsys.auth.role.Role;
 import com.sky1sbloo.ocjsys.auth.role.Roles;
+import com.sky1sbloo.ocjsys.integration.Authenticator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,16 +37,19 @@ public class LoginRegistrationTests {
     private final SampleUsers sampleUsers;
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+    private final Authenticator authenticator;
 
     @Autowired
     public LoginRegistrationTests(AuthUserRepository authUserRepository,
                                   SampleUsers sampleUsers,
                                   MockMvc mockMvc,
-                                  ObjectMapper objectMapper) {
+                                  ObjectMapper objectMapper,
+                                  Authenticator authenticator) {
         this.authUserRepository = authUserRepository;
         this.sampleUsers = sampleUsers;
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
+        this.authenticator = authenticator;
     }
 
     @BeforeEach
@@ -106,8 +110,8 @@ public class LoginRegistrationTests {
 
     @Test
     void adminShouldUpdateUserRole() throws Exception {
-        LoginResponse response = loginAndGetResponse(sampleUsers.getAdminLogin());
-        LoginResponse userResponse = loginAndGetResponse(sampleUsers.getUserLogin());
+        LoginResponse response = authenticator.loginAndGetResponse(sampleUsers.getAdminLogin());
+        LoginResponse userResponse = authenticator.loginAndGetResponse(sampleUsers.getUserLogin());
         URI updateRole = UriComponentsBuilder.fromUriString("/api/auth/role")
                 .queryParam("id", userResponse.getId())
                 .queryParam("roles", "ADMIN").build().toUri();
@@ -123,13 +127,5 @@ public class LoginRegistrationTests {
 
         mockMvc.perform(get("/api/users/").header("Authorization", "Bearer " + userResponse.getJwtToken()))
                 .andExpect(status().isOk());
-    }
-
-    private LoginResponse loginAndGetResponse(LoginRequest request) throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk()).andReturn();
-        return objectMapper.readValue(result.getResponse().getContentAsString(), LoginResponse.class);
     }
 }

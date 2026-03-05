@@ -39,6 +39,7 @@ public class SecurityConfig {
                                         "/api/auth/register",
                                         "/api/auth/logout").permitAll()
                                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                                .requestMatchers("/api/code/**").authenticated()
                                 .requestMatchers("/api/auth/refresh").authenticated()
                                 .requestMatchers("/api/auth/role").hasAuthority("CHANGE_USER_ROLE")
                                 .requestMatchers("/api/users/profile").authenticated()

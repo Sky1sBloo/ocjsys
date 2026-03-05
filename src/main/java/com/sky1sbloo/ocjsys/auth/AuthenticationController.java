@@ -63,6 +63,7 @@ public class AuthenticationController {
         var response = new LoginResponse(
                 userDetails.getId(),
                 userDetails.getUsername(),
+                userDetails.getUserProfile().getName(),
                 roles,
                 jwtToken,
                 refreshToken.getToken());

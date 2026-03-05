@@ -16,7 +16,10 @@ public class RolePermissionDataInitializer implements DataInitializer{
     @PostConstruct
     @Override
     public void initialize() {
-        createRoleIfNotExists(Roles.USER, Set.of());
+        Set<Permission> userPermissions = Set.of(
+                getOrCreatePermission(Permissions.CREATE_CODE_PROBLEMS)
+        );
+        createRoleIfNotExists(Roles.USER, userPermissions);
         Set<Permission> adminPermissions = Set.of(
                 getOrCreatePermission(Permissions.READ_USERS_INFO),
                 getOrCreatePermission(Permissions.CHANGE_USER_ROLE)
