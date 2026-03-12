@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CodeSubmissionDto {
     private Long problemId;
-    private String code;
+    private String sourceCode;
     private String language;
 }

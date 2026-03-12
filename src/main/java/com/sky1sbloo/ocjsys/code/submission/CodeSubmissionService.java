@@ -1,6 +1,5 @@
 package com.sky1sbloo.ocjsys.code.submission;
 
-import com.sky1sbloo.ocjsys.auth.AuthUser;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblemRepository;
 import com.sky1sbloo.ocjsys.code.submission.dto.CodeSubmissionDto;
 import com.sky1sbloo.ocjsys.runner.CodeRunner;
@@ -32,7 +31,7 @@ public class CodeSubmissionService {
         var codeSubmission = new CodeSubmission();
         codeSubmission.setProblem(codeProblemRepository.findById(submission.getProblemId()).orElse(null));
         codeSubmission.setSubmitter(userProfile);
-        codeSubmission.setCode(submission.getCode());
+        codeSubmission.setCode(submission.getSourceCode());
         codeSubmission.setLanguage(CodeLanguage.valueOf(submission.getLanguage().toUpperCase()));
         return codeSubmission;
     }
