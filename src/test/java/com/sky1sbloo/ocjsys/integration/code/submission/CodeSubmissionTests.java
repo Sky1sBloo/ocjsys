@@ -76,4 +76,64 @@ public class CodeSubmissionTests {
         String output = result.getResponse().getContentAsString();
         assertThat(output).contains("Hello, World!");
     }
+
+    @Test
+    void submitCodeShouldSucceed() throws Exception {
+        String authToken = authenticator.loginAndGetToken(sampleUsers.getUserLogin());
+        String adminAuthToken = authenticator.loginAndGetToken(sampleUsers.getAdminLogin());
+        CodeProblemCreateDto codeProblemCreateDto = CodeProblemCreateDto.builder()
+                .title("Hello world")
+                .tags(List.of())
+                .difficulty("EASY")
+                .description("Build hello world")
+                .solution("print('Hello, World!')")
+                .build();
+        MvcResult result = mockMvc.perform(post("/api/code/problems")
+                        .header("Authorization", adminAuthToken)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(codeProblemCreateDto)))
+                .andReturn();
+        CodeProblem problem = objectMapper.readValue(result.getResponse().getContentAsString(), CodeProblem.class);
+        assert problem != null;
+        CodeSubmissionDto codeSubmissionDto = CodeSubmissionDto.builder()
+                .problemId(problem.getId())
+                .sourceCode("print('Hello, World!')")
+                .language("python")
+                .build();
+        mockMvc.perform(post("/api/code/submissions")
+                        .header("Authorization", authToken)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(codeSubmissionDto)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void runCodeShouldFailWithInvalidCode() throws Exception {
+        String authToken = authenticator.loginAndGetToken(sampleUsers.getUserLogin());
+        CodeSubmissionDto codeSubmissionDto = CodeSubmissionDto.builder()
+                .problemId(1L)
+                .sourceCode("print('Hello, World!'")
+                .language("python")
+                .build();
+        mockMvc.perform(post("/api/code/submissions/run")
+                        .header("Authorization", authToken)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(codeSubmissionDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void runCodeShouldFailWithUnsupportedLanguage() throws Exception {
+        String authToken = authenticator.loginAndGetToken(sampleUsers.getUserLogin());
+        CodeSubmissionDto codeSubmissionDto = CodeSubmissionDto.builder()
+                .problemId(1L)
+                .sourceCode("print('Hello, World!')")
+                .language("randomLanguage")
+                .build();
+        mockMvc.perform(post("/api/code/submissions/run")
+                        .header("Authorization", authToken)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(codeSubmissionDto)))
+                .andExpect(status().isBadRequest());
+    }
 }
