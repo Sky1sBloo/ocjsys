@@ -16,10 +16,10 @@ public class CodeSubmissionService {
     private final CodeProblemRepository codeProblemRepository;
     private final CodeRunner codeRunner;
 
-    public void submitCode(CodeSubmissionDto submission, UserProfile userProfile) throws IOException, InterruptedException {
+    public CodeSubmission submitCode(CodeSubmissionDto submission, UserProfile userProfile) throws IOException, InterruptedException {
         var codeSubmission = createCodeSubmission(submission, userProfile);
-        codeSubmissionRepository.save(codeSubmission);
         codeRunner.runCode(codeSubmission);
+        return codeSubmissionRepository.save(codeSubmission);
     }
 
     public void runCode(CodeSubmissionDto submission, UserProfile userProfile) throws IOException, InterruptedException {
