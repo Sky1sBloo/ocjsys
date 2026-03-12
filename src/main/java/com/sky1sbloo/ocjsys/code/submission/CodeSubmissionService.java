@@ -22,14 +22,16 @@ public class CodeSubmissionService {
         return codeSubmissionRepository.save(codeSubmission);
     }
 
-    public void runCode(CodeSubmissionDto submission, UserProfile userProfile) throws IOException, InterruptedException {
+    public String runCode(CodeSubmissionDto submission, UserProfile userProfile) throws IOException, InterruptedException {
         var codeSubmission = createCodeSubmission(submission, userProfile);
-        codeRunner.runCode(codeSubmission);
+        return codeRunner.runCode(codeSubmission);
     }
 
     private CodeSubmission createCodeSubmission(CodeSubmissionDto submission, UserProfile userProfile) {
         var codeSubmission = new CodeSubmission();
-        codeSubmission.setProblem(codeProblemRepository.findById(submission.getProblemId()).orElse(null));
+        codeSubmission.setProblem(codeProblemRepository.findById(submission.getProblemId()).orElseThrow(
+                () -> new IllegalArgumentException("Problem not found")
+        ));
         codeSubmission.setSubmitter(userProfile);
         codeSubmission.setCode(submission.getSourceCode());
         codeSubmission.setLanguage(CodeLanguage.valueOf(submission.getLanguage().toUpperCase()));

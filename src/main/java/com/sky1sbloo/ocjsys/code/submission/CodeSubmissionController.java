@@ -6,9 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 
 import java.io.IOException;
 
@@ -20,7 +19,7 @@ public class CodeSubmissionController {
     private final CodeSubmissionService codeSubmissionService;
 
     @PostMapping
-    public ResponseEntity<?> submitCode(CodeSubmissionDto submission, @AuthenticationPrincipal AuthUser authUser) {
+    public ResponseEntity<?> submitCode(@RequestBody CodeSubmissionDto submission, @AuthenticationPrincipal AuthUser authUser) {
         try {
             codeSubmissionService.submitCode(submission, authUser.getUserProfile());
         } catch (IOException | IllegalArgumentException ex) {
@@ -35,9 +34,10 @@ public class CodeSubmissionController {
     }
 
     @PostMapping("/run")
-    public ResponseEntity<?> runCode(CodeSubmissionDto submission, @AuthenticationPrincipal AuthUser authUser) {
+    public ResponseEntity<?> runCode(@RequestBody CodeSubmissionDto submission, @AuthenticationPrincipal AuthUser authUser) {
         try {
-            codeSubmissionService.runCode(submission, authUser.getUserProfile());
+            String codePrint = codeSubmissionService.runCode(submission, authUser.getUserProfile());
+            return ResponseEntity.ok().body(codePrint);
         } catch (IOException | IllegalArgumentException ex) {
             log.error(ex.getMessage(), ex);
             return ResponseEntity.badRequest().body("Error executing code");
@@ -46,6 +46,5 @@ public class CodeSubmissionController {
             Thread.currentThread().interrupt();
             return ResponseEntity.badRequest().body("Error executing code");
         }
-        return ResponseEntity.ok().body("Code submitted successfully");
     }
 }
