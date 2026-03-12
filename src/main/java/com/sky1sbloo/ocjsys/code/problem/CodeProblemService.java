@@ -38,7 +38,7 @@ public class CodeProblemService {
         return codeProblems;
     }
 
-    public void createProblem(CodeProblemCreateDto codeProblem, AuthUser authUser)
+    public CodeProblem createProblem(CodeProblemCreateDto codeProblem, AuthUser authUser)
             throws IllegalArgumentException {
         var newProblem = new CodeProblem();
         newProblem.setOwner(authUser.getUserProfile());
@@ -47,7 +47,7 @@ public class CodeProblemService {
         newProblem.setSolution(codeProblem.solution());
         newProblem.setTags(codeProblem.tags());
         newProblem.setDifficulty(Difficulties.valueOf(codeProblem.difficulty().toUpperCase()));
-        codeProblemRepository.save(newProblem);
+        return codeProblemRepository.save(newProblem);
     }
 
     public CodeProblemSearchFilter convertToFilter(CodeProblemSearchFilterDto filterDto) throws

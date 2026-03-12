@@ -50,10 +50,10 @@ public class CodeProblemController {
         }
 
         try {
-            codeProblemService.createProblem(codeProblem, authUser);
+            CodeProblem problem = codeProblemService.createProblem(codeProblem, authUser);
+            return ResponseEntity.status(HttpStatus.CREATED).body(problem);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
