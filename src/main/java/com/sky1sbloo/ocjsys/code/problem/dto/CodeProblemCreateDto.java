@@ -1,6 +1,6 @@
 package com.sky1sbloo.ocjsys.code.problem.dto;
 
-import com.sky1sbloo.ocjsys.code.problem.solver.dto.CodeProblemSolverDto;
+import com.sky1sbloo.ocjsys.code.problem.verifier.dto.CodeProblemVerifierDto;
 import lombok.Builder;
 
 import java.util.List;
@@ -12,6 +12,6 @@ public record CodeProblemCreateDto(
         String difficulty,
         String description,
         String solution,
-        List<CodeProblemSolverDto> codeSolvers
+        List<CodeProblemVerifierDto> verifiers
 )
 {}

@@ -1,4 +1,4 @@
-package com.sky1sbloo.ocjsys.code.problem.solver;
+package com.sky1sbloo.ocjsys.code.problem.verifier;
 
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblem;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Entity
-public class CodeProblemSolver {
+public class CodeProblemVerifier {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
