@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Entity
-@IdClass(TestCaseId.class)
 public class TestCase {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem", referencedColumnName = "id", nullable = false)
     private CodeProblem problem;
-    @Id
     CodeLanguage language;
     String sourceCode;
 }
