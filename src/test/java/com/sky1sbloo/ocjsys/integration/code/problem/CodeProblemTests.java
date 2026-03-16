@@ -56,7 +56,8 @@ public class CodeProblemTests {
                 List.of("array", "hash-table"),
                 "EASY",
                 "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-                "Use a hash map to store the indices of the numbers and check for the complement."
+                "Use a hash map to store the indices of the numbers and check for the complement.",
+                List.of()
         );
         mockMvc.perform(post("/api/code/problems")
                         .header("Authorization", authToken)
@@ -73,7 +74,8 @@ public class CodeProblemTests {
                 List.of("array", "hash-table"),
                 "EASY",
                 "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-                "Use a hash map to store the indices of the numbers and check for the complement."
+                "Use a hash map to store the indices of the numbers and check for the complement.",
+                List.of()
         );
         mockMvc.perform(post("/api/code/problems")
                         .header("Authorization", "Bearer " + loginResponse.getJwtToken())
