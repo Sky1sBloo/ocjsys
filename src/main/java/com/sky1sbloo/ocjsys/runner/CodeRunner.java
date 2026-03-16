@@ -1,6 +1,6 @@
 package com.sky1sbloo.ocjsys.runner;
 
-import com.sky1sbloo.ocjsys.code.submission.CodeLanguage;
+import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.submission.CodeSubmission;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
