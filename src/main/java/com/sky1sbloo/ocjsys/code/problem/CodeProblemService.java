@@ -1,12 +1,17 @@
 package com.sky1sbloo.ocjsys.code.problem;
 
 import com.sky1sbloo.ocjsys.auth.AuthUser;
+import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemSearchFilterDto;
+import com.sky1sbloo.ocjsys.code.problem.verifier.CodeProblemVerifier;
+import com.sky1sbloo.ocjsys.code.problem.verifier.CodeProblemVerifierRepository;
+import com.sky1sbloo.ocjsys.code.problem.verifier.dto.CodeProblemVerifierDto;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +21,7 @@ import java.util.List;
 public class CodeProblemService {
     private final CodeProblemRepository codeProblemRepository;
     private final UserProfileRepository userProfileRepository;
+    private final CodeProblemVerifierRepository codeProblemVerifierRepository;
 
     public List<CodeProblem> findProblems(CodeProblemSearchFilter filter) {
         List<CodeProblem> codeProblems = new ArrayList<>();
@@ -38,6 +44,7 @@ public class CodeProblemService {
         return codeProblems;
     }
 
+    @Transactional
     public CodeProblem createProblem(CodeProblemCreateDto codeProblem, AuthUser authUser)
             throws IllegalArgumentException {
         var newProblem = new CodeProblem();
@@ -47,7 +54,14 @@ public class CodeProblemService {
         newProblem.setSolution(codeProblem.solution());
         newProblem.setTags(codeProblem.tags());
         newProblem.setDifficulty(Difficulties.valueOf(codeProblem.difficulty().toUpperCase()));
-        return codeProblemRepository.save(newProblem);
+        CodeProblem problem = codeProblemRepository.save(newProblem);
+        for (CodeProblemVerifierDto verifierDto : codeProblem.verifiers()) {
+            CodeProblemVerifier verifier = CodeProblemVerifier.builder()
+                    .problem(problem)
+                    .language(CodeLanguage.valueOf(verifierDto.language())).build();
+            codeProblemVerifierRepository.save(verifier);
+        }
+        return newProblem;
     }
 
     public CodeProblemSearchFilter convertToFilter(CodeProblemSearchFilterDto filterDto) throws
