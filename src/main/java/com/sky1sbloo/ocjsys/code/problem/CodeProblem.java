@@ -14,7 +14,7 @@ public class CodeProblem {
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner", referencedColumnName = "id", nullable = true)
+    @JoinColumn(name = "owner", referencedColumnName = "id")
     private UserProfile owner;
     private String title;
     @Enumerated(EnumType.STRING)
