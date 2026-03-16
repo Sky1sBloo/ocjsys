@@ -3,6 +3,7 @@ package com.sky1sbloo.ocjsys.code.problem;
 import com.sky1sbloo.ocjsys.auth.AuthUser;
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
+import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemEditDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemSearchFilterDto;
 import com.sky1sbloo.ocjsys.code.problem.verifier.CodeProblemVerifier;
 import com.sky1sbloo.ocjsys.code.problem.verifier.CodeProblemVerifierRepository;
@@ -10,6 +11,7 @@ import com.sky1sbloo.ocjsys.code.problem.verifier.dto.CodeProblemVerifierDto;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,10 +60,27 @@ public class CodeProblemService {
         for (CodeProblemVerifierDto verifierDto : codeProblem.verifiers()) {
             CodeProblemVerifier verifier = CodeProblemVerifier.builder()
                     .problem(problem)
-                    .language(CodeLanguage.valueOf(verifierDto.language())).build();
+                    .language(CodeLanguage.valueOf(verifierDto.language().toUpperCase())).build();
             codeProblemVerifierRepository.save(verifier);
         }
         return newProblem;
+    }
+
+    @Transactional
+    public CodeProblem editProblem(CodeProblemEditDto codeProblemEditDto, AuthUser authUser)
+            throws AccessDeniedException, IllegalArgumentException {
+        CodeProblem codeProblem = codeProblemRepository.findById(codeProblemEditDto.id()).orElseThrow(
+                () -> new IllegalArgumentException("Problem with id " + codeProblemEditDto.id() + " not found")
+        );
+        if (!codeProblem.getOwner().getAuthUser().getUsername().equals(authUser.getUsername())) {
+            throw new AccessDeniedException("Forbidden");
+        }
+        codeProblem.setTitle(codeProblemEditDto.title());
+        codeProblem.setDescription(codeProblemEditDto.description());
+        codeProblem.setSolution(codeProblemEditDto.solution());
+        codeProblem.setTags(codeProblemEditDto.tags());
+        codeProblem.setDifficulty(Difficulties.valueOf(codeProblemEditDto.difficulty().toUpperCase()));
+        return codeProblemRepository.save(codeProblem);
     }
 
     public CodeProblemSearchFilter convertToFilter(CodeProblemSearchFilterDto filterDto) throws

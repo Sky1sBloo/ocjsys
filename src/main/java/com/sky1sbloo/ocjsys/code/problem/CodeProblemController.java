@@ -2,10 +2,12 @@ package com.sky1sbloo.ocjsys.code.problem;
 
 import com.sky1sbloo.ocjsys.auth.AuthUser;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
+import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemEditDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemSearchFilterDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +55,24 @@ public class CodeProblemController {
             CodeProblem problem = codeProblemService.createProblem(codeProblem, authUser);
             return ResponseEntity.status(HttpStatus.CREATED).body(problem);
         } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping
+    @PreAuthorize("hasAuthority('CREATE_CODE_PROBLEMS')")
+    public ResponseEntity<CodeProblem> updateProblem(
+            @RequestBody CodeProblemEditDto codeProblem,
+            @AuthenticationPrincipal AuthUser authUser
+            ) {
+        if (authUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        try {
+            CodeProblem problem = codeProblemService.editProblem(codeProblem, authUser);
+            return ResponseEntity.ok().body(problem);
+        } catch (AccessDeniedException | IllegalArgumentException ex) {
             return ResponseEntity.badRequest().build();
         }
     }
