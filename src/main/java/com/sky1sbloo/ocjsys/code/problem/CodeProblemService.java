@@ -75,11 +75,21 @@ public class CodeProblemService {
         if (!codeProblem.getOwner().getAuthUser().getUsername().equals(authUser.getUsername())) {
             throw new AccessDeniedException("Forbidden");
         }
-        codeProblem.setTitle(codeProblemEditDto.title());
-        codeProblem.setDescription(codeProblemEditDto.description());
-        codeProblem.setSolution(codeProblemEditDto.solution());
-        codeProblem.setTags(codeProblemEditDto.tags());
-        codeProblem.setDifficulty(Difficulties.valueOf(codeProblemEditDto.difficulty().toUpperCase()));
+        if (codeProblemEditDto.title() != null) {
+            codeProblem.setTitle(codeProblemEditDto.title());
+        }
+        if (codeProblemEditDto.description() != null) {
+            codeProblem.setDescription(codeProblemEditDto.description());
+        }
+        if (codeProblemEditDto.solution() != null) {
+            codeProblem.setSolution(codeProblemEditDto.solution());
+        }
+        if (codeProblemEditDto.tags() != null) {
+            codeProblem.setTags(codeProblemEditDto.tags());
+        }
+        if (codeProblemEditDto.difficulty() != null) {
+            codeProblem.setDifficulty(Difficulties.valueOf(codeProblemEditDto.difficulty().toUpperCase()));
+        }
         return codeProblemRepository.save(codeProblem);
     }
 
