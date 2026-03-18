@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.List;
+import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -52,7 +52,7 @@ public class CodeSubmissionTests {
         String adminAuthToken = authenticator.loginAndGetToken(sampleUsers.getAdminLogin());
         CodeProblemCreateDto codeProblemCreateDto = CodeProblemCreateDto.builder()
                 .title("Hello world")
-                .tags(List.of())
+                .tags(Set.of())
                 .difficulty(Difficulties.EASY)
                 .description("Build hello world")
                 .solution("print('Hello, World!')")
@@ -84,7 +84,7 @@ public class CodeSubmissionTests {
         String adminAuthToken = authenticator.loginAndGetToken(sampleUsers.getAdminLogin());
         CodeProblemCreateDto codeProblemCreateDto = CodeProblemCreateDto.builder()
                 .title("Hello world")
-                .tags(List.of())
+                .tags(Set.of())
                 .difficulty(Difficulties.EASY)
                 .description("Build hello world")
                 .solution("print('Hello, World!')")

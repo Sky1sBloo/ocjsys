@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -28,7 +27,7 @@ public class CodeProblem {
     @CollectionTable(name="code_problem_tags", joinColumns = @JoinColumn(name="code_problem_id",
             referencedColumnName = "id"))
     @Column(name="tag")
-    private List<String> tags;
+    private Set<String> tags;
     private String description;
     private String solution;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "codeProblem", cascade = CascadeType.ALL, orphanRemoval = true)

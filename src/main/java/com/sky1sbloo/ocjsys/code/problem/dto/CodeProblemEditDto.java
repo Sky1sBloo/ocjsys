@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Set;
 
 @Builder
 @Data
@@ -15,7 +15,7 @@ import java.util.List;
 public class CodeProblemEditDto {
     private long id;
     private String title;
-    private List<String> tags;
+    private Set<String> tags;
     private Difficulties difficulty;
     private String description;
     private String solution;

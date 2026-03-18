@@ -23,7 +23,7 @@ public class CodeProblemResponseDto {
     private UserProfile owner;
     private String title;
     private Difficulties difficulty;
-    private List<String> tags;
+    private Set<String> tags;
     private String description;
     private String solution;
     @Builder.Default

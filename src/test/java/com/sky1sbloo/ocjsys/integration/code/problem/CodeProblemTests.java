@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.List;
+import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -56,7 +56,7 @@ public class CodeProblemTests {
         String authToken = authenticator.loginAndGetToken(sampleUsers.getUserLogin());
         CodeProblemCreateDto createDto = new CodeProblemCreateDto(
                 "Two Sum",
-                List.of("array", "hash-table"),
+                Set.of("array", "hash-table"),
                 Difficulties.EASY,
                 "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
                 "Use a hash map to store the indices of the numbers and check for the complement."
@@ -77,7 +77,7 @@ public class CodeProblemTests {
         LoginResponse loginResponse = authenticator.loginAndGetResponse(sampleUsers.getUserLogin());
         CodeProblemCreateDto createDto = new CodeProblemCreateDto(
                 "Two Sum",
-                List.of("array", "hash-table"),
+                Set.of("array", "hash-table"),
                 Difficulties.EASY,
                 "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
                 "Use a hash map to store the indices of the numbers and check for the complement."
