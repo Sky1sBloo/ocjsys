@@ -8,9 +8,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 import java.io.IOException;
+import java.net.URI;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -22,7 +24,11 @@ public class CodeSubmissionController {
     @PostMapping
     public ResponseEntity<?> submitCode(@RequestBody CodeSubmissionDto submission, @AuthenticationPrincipal AuthUser authUser) {
         try {
-            codeSubmissionService.submitCode(submission, authUser.getUserProfile());
+            CodeSubmission codeSubmission = codeSubmissionService.submitCode(submission, authUser.getUserProfile());
+
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                    .buildAndExpand(codeSubmission.getId()).toUri();
+            return ResponseEntity.created(location).body("Code submitted successfully");
         } catch (IOException | IllegalArgumentException ex) {
             log.error(ex.getMessage(), ex);
             return ResponseEntity.badRequest().body("Error executing code");
@@ -31,7 +37,6 @@ public class CodeSubmissionController {
             Thread.currentThread().interrupt();
             return ResponseEntity.badRequest().body("Error executing code");
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body("Code submitted successfully");
     }
 
     @PostMapping("/run")

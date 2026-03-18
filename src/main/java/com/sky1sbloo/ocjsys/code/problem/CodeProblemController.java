@@ -11,7 +11,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -53,7 +55,9 @@ public class CodeProblemController {
 
         try {
             CodeProblem problem = codeProblemService.createProblem(codeProblem, authUser);
-            return ResponseEntity.status(HttpStatus.CREATED).body(problem);
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                    .buildAndExpand(problem.getId()).toUri();
+            return ResponseEntity.created(location).body(problem);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().build();
         }
