@@ -57,9 +57,8 @@ public class CodeProblemService {
         newProblem.setSolution(codeProblemDto.getSolution());
         newProblem.setTags(codeProblemDto.getTags());
         newProblem.setDifficulty(codeProblemDto.getDifficulty());
-        CodeProblem problem = codeProblemRepository.save(newProblem);
 
-        return newProblem;
+        return codeProblemRepository.save(newProblem);
     }
 
     @Transactional
