@@ -17,15 +17,13 @@ public class CodeSubmissionService {
     private final CodeProblemRepository codeProblemRepository;
     private final CodeRunner codeRunner;
 
-    public CodeSubmission submitCode(CodeSubmissionDto submission, UserProfile userProfile)
-            throws IOException, InterruptedException, IllegalStateException {
+    public CodeSubmission submitCode(CodeSubmissionDto submission, UserProfile userProfile) {
         var codeSubmission = createCodeSubmission(submission, userProfile);
         codeRunner.runCode(codeSubmission);
         return codeSubmissionRepository.save(codeSubmission);
     }
 
-    public String runCode(CodeSubmissionDto submission, UserProfile userProfile)
-            throws IOException, InterruptedException, IllegalStateException {
+    public String runCode(CodeSubmissionDto submission, UserProfile userProfile) {
         var codeSubmission = createCodeSubmission(submission, userProfile);
         return codeRunner.runCode(codeSubmission);
     }
