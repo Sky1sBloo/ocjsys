@@ -28,9 +28,11 @@ public class SolutionTemplateService {
 
     public Set<SolutionTemplate> getSolutionTemplatesOfProblem(Long problemId)
             throws EntityNotFoundException {
-        return codeProblemRepository.findById(problemId)
-                .orElseThrow(() -> new EntityNotFoundException("Cannot find problem: " + problemId))
-                .getSolutionTemplates();
+        return solutionTemplateRepository.findAllByCodeProblem_Id(problemId);
+    }
+
+    public SolutionTemplate getSolutionTemplateOfProblem(Long problemId, CodeLanguage language) {
+        return solutionTemplateRepository.findByCodeProblem_IdAndLanguage(problemId, language);
     }
 
     public void addSolutionTemplate(SolutionTemplateCreateDto solutionTemplateCreateDto) {
@@ -54,20 +56,18 @@ public class SolutionTemplateService {
                 () -> new EntityNotFoundException("Code problem with id: " + solutionTemplateCreateDto.getProblemId() +
                         " not found")
         );
-        var language = CodeLanguage.valueOf(solutionTemplateCreateDto.getLanguage());
         return SolutionTemplate.builder()
                 .codeProblem(problem)
-                .language(language)
+                .language(solutionTemplateCreateDto.getLanguage())
                 .sourceCode(solutionTemplateCreateDto.getSourceCode()).build();
     }
 
-    private SolutionTemplateId createTemplateIdFromDto(SolutionTemplateGetDto solutionTemplateCreateDto)
+    private SolutionTemplateId createTemplateIdFromDto(SolutionTemplateGetDto solutionTemplateGetDto)
             throws EntityNotFoundException, IllegalArgumentException {
-        CodeProblem problem = codeProblemRepository.findById(solutionTemplateCreateDto.getProblemId()).orElseThrow(
-                () -> new EntityNotFoundException("Code problem with id: " + solutionTemplateCreateDto.getProblemId() +
+        CodeProblem problem = codeProblemRepository.findById(solutionTemplateGetDto.getProblemId()).orElseThrow(
+                () -> new EntityNotFoundException("Code problem with id: " + solutionTemplateGetDto.getProblemId() +
                         " not found")
         );
-        var language = CodeLanguage.valueOf(solutionTemplateCreateDto.getLanguage());
-        return new SolutionTemplateId(problem, language);
+        return new SolutionTemplateId(problem, solutionTemplateGetDto.getLanguage());
     }
 }
