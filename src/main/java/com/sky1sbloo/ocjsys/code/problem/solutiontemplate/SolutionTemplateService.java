@@ -3,11 +3,15 @@ package com.sky1sbloo.ocjsys.code.problem.solutiontemplate;
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblem;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblemRepository;
-import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateDto;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateCreateDto;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateGetDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Transactional
@@ -16,41 +20,55 @@ public class SolutionTemplateService {
     private final CodeProblemRepository codeProblemRepository;
     private final SolutionTemplateRepository solutionTemplateRepository;
 
-    public void addSolutionTemplate(SolutionTemplateDto solutionTemplateDto) {
-        SolutionTemplate solutionTemplate = createSolutionTemplateFromDto(solutionTemplateDto);
+    public SolutionTemplate getSolutionTemplateById(SolutionTemplateGetDto solutionTemplateGetDto)
+            throws EntityNotFoundException {
+        SolutionTemplateId templateId = createTemplateIdFromDto(solutionTemplateGetDto);
+        return solutionTemplateRepository.findById(templateId)
+                .orElseThrow(() -> new EntityNotFoundException(templateId.toString()));
+    }
+
+    public List<SolutionTemplate> getSolutionTemplatesOfProblem(Long problemId)
+            throws EntityNotFoundException {
+        CodeProblem problem = codeProblemRepository.findById(problemId)
+                .orElseThrow(()-> new EntityNotFoundException(problemId.toString()));
+        List<SolutionTemplate> solutionTemplates = solutionTemplateRepository.find
+    }
+
+    public void addSolutionTemplate(SolutionTemplateCreateDto solutionTemplateCreateDto) {
+        SolutionTemplate solutionTemplate = createSolutionTemplateFromDto(solutionTemplateCreateDto);
         solutionTemplateRepository.save(solutionTemplate);
     }
 
-    public void editSolutionTemplate(SolutionTemplateDto solutionTemplateDto) {
-        SolutionTemplate solutionTemplate = createSolutionTemplateFromDto(solutionTemplateDto);
+    public void editSolutionTemplate(SolutionTemplateCreateDto solutionTemplateCreateDto) {
+        SolutionTemplate solutionTemplate = createSolutionTemplateFromDto(solutionTemplateCreateDto);
         solutionTemplateRepository.save(solutionTemplate);
     }
 
-    public void deleteSolutionTemplate(SolutionTemplateDto solutionTemplateDto) {
-        SolutionTemplateId templateId = createTemplateIdFromDto(solutionTemplateDto);
+    public void deleteSolutionTemplate(SolutionTemplateCreateDto solutionTemplateCreateDto) {
+        SolutionTemplateId templateId = createTemplateIdFromDto(solutionTemplateCreateDto);
         solutionTemplateRepository.deleteById(templateId);
     }
 
-    private SolutionTemplate createSolutionTemplateFromDto(SolutionTemplateDto solutionTemplateDto)
+    private SolutionTemplate createSolutionTemplateFromDto(SolutionTemplateCreateDto solutionTemplateCreateDto)
             throws EntityNotFoundException, IllegalArgumentException {
-        CodeProblem problem = codeProblemRepository.findById(solutionTemplateDto.problemId()).orElseThrow(
-                () -> new EntityNotFoundException("Code problem with id: " + solutionTemplateDto.problemId() +
+        CodeProblem problem = codeProblemRepository.findById(solutionTemplateCreateDto.getProblemId()).orElseThrow(
+                () -> new EntityNotFoundException("Code problem with id: " + solutionTemplateCreateDto.getProblemId() +
                         " not found")
         );
-        var language = CodeLanguage.valueOf(solutionTemplateDto.language());
+        var language = CodeLanguage.valueOf(solutionTemplateCreateDto.getLanguage());
         return SolutionTemplate.builder()
                 .codeProblem(problem)
                 .language(language)
-                .sourceCode(solutionTemplateDto.sourceCode()).build();
+                .sourceCode(solutionTemplateCreateDto.getSourceCode()).build();
     }
 
-    private SolutionTemplateId createTemplateIdFromDto(SolutionTemplateDto solutionTemplateDto)
+    private SolutionTemplateId createTemplateIdFromDto(SolutionTemplateGetDto solutionTemplateCreateDto)
             throws EntityNotFoundException, IllegalArgumentException {
-        CodeProblem problem = codeProblemRepository.findById(solutionTemplateDto.problemId()).orElseThrow(
-                () -> new EntityNotFoundException("Code problem with id: " + solutionTemplateDto.problemId() +
+        CodeProblem problem = codeProblemRepository.findById(solutionTemplateCreateDto.getProblemId()).orElseThrow(
+                () -> new EntityNotFoundException("Code problem with id: " + solutionTemplateCreateDto.getProblemId() +
                         " not found")
         );
-        var language = CodeLanguage.valueOf(solutionTemplateDto.language());
+        var language = CodeLanguage.valueOf(solutionTemplateCreateDto.getLanguage());
         return new SolutionTemplateId(problem, language);
     }
 }

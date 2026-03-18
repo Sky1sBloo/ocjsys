@@ -16,12 +16,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
+@Table(name="solution_templates")
 @IdClass(SolutionTemplateId.class)
 public class SolutionTemplate {
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="code_problem_id", referencedColumnName = "id")
     private CodeProblem codeProblem;
     @Id
+    @Enumerated(EnumType.STRING)
     private CodeLanguage language;
     private String sourceCode;
 }
