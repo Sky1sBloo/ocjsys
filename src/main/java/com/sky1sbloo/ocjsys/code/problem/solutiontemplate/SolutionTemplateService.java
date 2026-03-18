@@ -7,11 +7,10 @@ import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateCr
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateGetDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Transactional
@@ -27,11 +26,11 @@ public class SolutionTemplateService {
                 .orElseThrow(() -> new EntityNotFoundException(templateId.toString()));
     }
 
-    public List<SolutionTemplate> getSolutionTemplatesOfProblem(Long problemId)
+    public Set<SolutionTemplate> getSolutionTemplatesOfProblem(Long problemId)
             throws EntityNotFoundException {
-        CodeProblem problem = codeProblemRepository.findById(problemId)
-                .orElseThrow(()-> new EntityNotFoundException(problemId.toString()));
-        List<SolutionTemplate> solutionTemplates = solutionTemplateRepository.find
+        return codeProblemRepository.findById(problemId)
+                .orElseThrow(() -> new EntityNotFoundException("Cannot find problem: " + problemId))
+                .getSolutionTemplates();
     }
 
     public void addSolutionTemplate(SolutionTemplateCreateDto solutionTemplateCreateDto) {
