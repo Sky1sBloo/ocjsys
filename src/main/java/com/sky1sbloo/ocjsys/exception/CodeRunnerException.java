@@ -7,11 +7,16 @@ import java.io.IOException;
 
 public class CodeRunnerException extends RuntimeException {
     public enum Type {
-        IO_EXCEPTION,
-        INTERRUPTED,
-        UNSUPPORTED_LANGUAGE,
-        DOCKER_ERROR,
-        UNKNOWN
+        IO_EXCEPTION("IO Exception"),
+        INTERRUPTED("Process interrupted"),
+        UNSUPPORTED_LANGUAGE("Unsupported language"),
+        DOCKER_ERROR("Docker might not be running"),
+        UNKNOWN("Unknown");
+
+        public final String label;
+        Type(String label) {
+            this.label = label;
+        }
     }
     @Getter
     private final Type type;
@@ -27,6 +32,7 @@ public class CodeRunnerException extends RuntimeException {
     }
 
     public CodeRunnerException(Type type) {
+        super(type.label);
         this.type = type;
     }
 
