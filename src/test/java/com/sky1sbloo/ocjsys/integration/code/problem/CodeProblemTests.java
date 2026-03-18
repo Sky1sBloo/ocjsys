@@ -1,8 +1,11 @@
 package com.sky1sbloo.ocjsys.integration.code.problem;
 
 import com.sky1sbloo.ocjsys.auth.dto.LoginResponse;
+import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.Difficulties;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
+import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemResponseDto;
+import com.sky1sbloo.ocjsys.code.problem.verifier.dto.CodeProblemVerifierDto;
 import com.sky1sbloo.ocjsys.integration.Authenticator;
 import com.sky1sbloo.ocjsys.integration.auth.SampleUsers;
 import org.junit.jupiter.api.Assertions;
@@ -20,6 +23,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -97,5 +101,31 @@ public class CodeProblemTests {
                 .andExpect(jsonPath("$[0].title").value("Two Sum"))
                 .andExpect(jsonPath("$[0].difficulty").value("EASY"))
                 .andExpect(jsonPath("$[0].owner.name").value(loginResponse.getName()));
+    }
+
+    @Test
+    void createCodeProblemWithSolutionTemplate() throws Exception {
+        String authToken = authenticator.loginAndGetToken(sampleUsers.getUserLogin());
+        CodeProblemCreateDto createDto = new CodeProblemCreateDto(
+                "Two Sum",
+                List.of("array", "hash-table"),
+                Difficulties.MEDIUM,
+                "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+                "Use a hash map to store the indices of the numbers and check for the complement.",
+                Set.of(new CodeProblemVerifierDto(CodeLanguage.PYTHON, "fn test() {}"))
+        );
+
+        MvcResult result = mockMvc.perform(post("/api/code/problems")
+                        .header("Authorization", authToken)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(createDto)))
+                .andExpect(status().isCreated()).andReturn();
+        String location = result.getResponse().getHeader("Location");
+        Assertions.assertNotNull(location);
+        MvcResult getResult = mockMvc.perform(get(location).header("Authorization", authToken))
+                .andExpect(status().isOk()).andReturn();
+        String response = getResult.getResponse().getContentAsString();
+        CodeProblemResponseDto codeProblem = objectMapper.readValue(response, CodeProblemResponseDto.class);
+        assertThat(codeProblem.getSolutionTemplates().size()).isEqualTo(1);
     }
 }

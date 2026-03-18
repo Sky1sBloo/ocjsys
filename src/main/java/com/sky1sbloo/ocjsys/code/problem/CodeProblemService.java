@@ -1,7 +1,6 @@
 package com.sky1sbloo.ocjsys.code.problem;
 
 import com.sky1sbloo.ocjsys.auth.AuthUser;
-import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemEditDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemSearchFilterDto;
@@ -16,9 +15,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
@@ -27,8 +26,8 @@ public class CodeProblemService {
     private final UserProfileRepository userProfileRepository;
     private final CodeProblemVerifierRepository codeProblemVerifierRepository;
 
-    public List<CodeProblem> findProblems(CodeProblemSearchFilter filter) {
-        List<CodeProblem> codeProblems = new ArrayList<>();
+    public Set<CodeProblem> findProblems(CodeProblemSearchFilter filter) {
+        Set<CodeProblem> codeProblems = new HashSet<>();
         if (filter.getOwner() != null) {
             codeProblems.addAll(codeProblemRepository.findByOwner(filter.getOwner()));
         }
@@ -102,7 +101,7 @@ public class CodeProblemService {
         filter.setTitle(filterDto.title());
         filter.setTags(filterDto.tags());
         if (filterDto.difficulties() != null) {
-            List<Difficulties> difficulties = new ArrayList<>();
+            Set<Difficulties> difficulties = new HashSet<>();
             for (String difficultyStr : filterDto.difficulties()) {
                 Difficulties difficulty = Difficulties.valueOf(difficultyStr.toUpperCase());
                 difficulties.add(difficulty);
