@@ -1,4 +1,4 @@
-package com.sky1sbloo.ocjsys.integration.exception;
+package com.sky1sbloo.ocjsys.integration.configuration;
 
 import com.sky1sbloo.ocjsys.exception.GlobalExceptionHandler;
 import com.sky1sbloo.ocjsys.exception.dto.ErrorResponseDto;
