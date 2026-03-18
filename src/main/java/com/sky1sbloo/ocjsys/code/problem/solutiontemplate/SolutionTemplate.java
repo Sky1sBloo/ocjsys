@@ -1,4 +1,4 @@
-package com.sky1sbloo.ocjsys.code.problem.initialcode;
+package com.sky1sbloo.ocjsys.code.problem.solutiontemplate;
 
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblem;
@@ -16,8 +16,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
-@IdClass(CodeProblemInitialId.class)
-public class CodeProblemInitial {
+@IdClass(SolutionTemplateId.class)
+public class SolutionTemplate {
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     private CodeProblem codeProblem;
