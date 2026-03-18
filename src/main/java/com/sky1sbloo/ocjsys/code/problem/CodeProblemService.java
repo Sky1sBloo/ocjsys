@@ -5,7 +5,6 @@ import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemEditDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemSearchFilterDto;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplate;
-import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplateRepository;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateCreateDto;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
@@ -24,7 +23,6 @@ import java.util.Set;
 public class CodeProblemService {
     private final CodeProblemRepository codeProblemRepository;
     private final UserProfileRepository userProfileRepository;
-    private final SolutionTemplateRepository solutionTemplateRepository;
 
     public Set<CodeProblem> findProblems(CodeProblemSearchFilter filter) {
         Set<CodeProblem> codeProblems = new HashSet<>();
@@ -70,7 +68,7 @@ public class CodeProblemService {
                         .sourceCode(solutionTemplateDto.getSourceCode())
                         .verifierSourceCode(solutionTemplateDto.getVerifierSourceCode())
                         .build();
-                solutionTemplateRepository.save(template);
+                problem.getSolutionTemplates().add(template);
             }
         }
 
