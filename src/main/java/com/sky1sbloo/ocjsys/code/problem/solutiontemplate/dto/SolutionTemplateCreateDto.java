@@ -8,6 +8,7 @@ import lombok.Setter;
 
 /**
  * Used by the code problem service
+ * @see SolutionTemplateDto for adding or deletion of with problems already initialized
  */
 @AllArgsConstructor
 @NoArgsConstructor
