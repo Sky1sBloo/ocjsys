@@ -60,7 +60,7 @@ public class CodeProblemService {
         newProblem.setDescription(codeProblem.description());
         newProblem.setSolution(codeProblem.solution());
         newProblem.setTags(codeProblem.tags());
-        newProblem.setDifficulty(Difficulties.valueOf(codeProblem.difficulty().toUpperCase()));
+        newProblem.setDifficulty(codeProblem.difficulty());
         CodeProblem problem = codeProblemRepository.save(newProblem);
         for (CodeProblemVerifierDto verifierDto : codeProblem.verifiers()) {
             CodeProblemVerifier verifier = CodeProblemVerifier.builder()
@@ -93,7 +93,7 @@ public class CodeProblemService {
             codeProblem.setTags(codeProblemEditDto.tags());
         }
         if (codeProblemEditDto.difficulty() != null) {
-            codeProblem.setDifficulty(Difficulties.valueOf(codeProblemEditDto.difficulty().toUpperCase()));
+            codeProblem.setDifficulty(codeProblemEditDto.difficulty());
         }
         return codeProblemRepository.save(codeProblem);
     }

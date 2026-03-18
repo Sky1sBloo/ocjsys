@@ -1,5 +1,6 @@
 package com.sky1sbloo.ocjsys.code.problem.dto;
 
+import com.sky1sbloo.ocjsys.code.problem.Difficulties;
 import com.sky1sbloo.ocjsys.code.problem.verifier.dto.CodeProblemVerifierDto;
 import lombok.Builder;
 
@@ -9,7 +10,7 @@ import java.util.List;
 public record CodeProblemCreateDto(
         String title,
         List<String> tags,
-        String difficulty,
+        Difficulties difficulty,
         String description,
         String solution,
         List<CodeProblemVerifierDto> verifiers
