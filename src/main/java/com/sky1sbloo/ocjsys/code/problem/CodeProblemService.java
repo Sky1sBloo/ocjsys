@@ -67,7 +67,7 @@ public class CodeProblemService {
             for (CodeProblemVerifierDto verifierDto : codeProblemDto.getVerifiers()) {
                 CodeProblemVerifier verifier = CodeProblemVerifier.builder()
                         .problem(problem)
-                        .language(CodeLanguage.valueOf(verifierDto.language().toUpperCase())).build();
+                        .language(verifierDto.language()).build();
                 codeProblemVerifierRepository.save(verifier);
             }
         }

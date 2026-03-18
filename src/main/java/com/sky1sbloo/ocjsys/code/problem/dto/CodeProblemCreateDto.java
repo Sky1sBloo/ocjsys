@@ -21,5 +21,6 @@ public class CodeProblemCreateDto {
     private Difficulties difficulty;
     private String description;
     private String solution;
+    @Builder.Default
     private Set<CodeProblemVerifierDto> verifiers = new HashSet<>();
 }
