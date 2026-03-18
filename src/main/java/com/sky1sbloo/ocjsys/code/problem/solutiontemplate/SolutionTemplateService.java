@@ -35,9 +35,9 @@ public class SolutionTemplateService {
         return solutionTemplateRepository.findByCodeProblem_IdAndLanguage(problemId, language);
     }
 
-    public void addSolutionTemplate(SolutionTemplateCreateDto solutionTemplateCreateDto) {
+    public SolutionTemplate addSolutionTemplate(SolutionTemplateCreateDto solutionTemplateCreateDto) {
         SolutionTemplate solutionTemplate = createSolutionTemplateFromDto(solutionTemplateCreateDto);
-        solutionTemplateRepository.save(solutionTemplate);
+        return solutionTemplateRepository.save(solutionTemplate);
     }
 
     public void editSolutionTemplate(SolutionTemplateCreateDto solutionTemplateCreateDto) {
@@ -45,8 +45,8 @@ public class SolutionTemplateService {
         solutionTemplateRepository.save(solutionTemplate);
     }
 
-    public void deleteSolutionTemplate(SolutionTemplateCreateDto solutionTemplateCreateDto) {
-        SolutionTemplateId templateId = createTemplateIdFromDto(solutionTemplateCreateDto);
+    public void deleteSolutionTemplate(SolutionTemplateGetDto solutionTemplateGetDto) {
+        SolutionTemplateId templateId = createTemplateIdFromDto(solutionTemplateGetDto);
         solutionTemplateRepository.deleteById(templateId);
     }
 

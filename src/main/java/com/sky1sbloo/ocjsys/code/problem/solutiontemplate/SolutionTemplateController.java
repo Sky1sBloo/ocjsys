@@ -2,11 +2,13 @@ package com.sky1sbloo.ocjsys.code.problem.solutiontemplate;
 
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateCreateDto;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateGetDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -28,8 +30,25 @@ public class SolutionTemplateController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addSolutionTemplate(@RequestBody SolutionTemplateCreateDto solutionTemplateCreateDto) {
-        solutionTemplateService.addSolutionTemplate(solutionTemplateCreateDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<Void> addSolutionTemplate(@RequestBody SolutionTemplateCreateDto solutionTemplateCreateDto) {
+        SolutionTemplate template = solutionTemplateService.addSolutionTemplate(solutionTemplateCreateDto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                .queryParam("language", template.getLanguage())
+                .buildAndExpand(template.getCodeProblem().getId()).toUri();
+        return ResponseEntity.created(location).build();
     }
+
+    @PutMapping
+    public ResponseEntity<Void> updateSolutionTemplate(
+            @RequestBody SolutionTemplateCreateDto solutionTemplateCreateDto) {
+        solutionTemplateService.editSolutionTemplate(solutionTemplateCreateDto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteSolutionTemplate(SolutionTemplateGetDto solutionTemplateGetDto) {
+        solutionTemplateService.deleteSolutionTemplate(solutionTemplateGetDto);
+        return ResponseEntity.noContent().build();
+    }
+
 }
