@@ -4,6 +4,7 @@ import com.sky1sbloo.ocjsys.auth.dto.LoginResponse;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
 import com.sky1sbloo.ocjsys.integration.Authenticator;
 import com.sky1sbloo.ocjsys.integration.auth.SampleUsers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
@@ -59,11 +61,15 @@ public class CodeProblemTests {
                 "Use a hash map to store the indices of the numbers and check for the complement.",
                 List.of()
         );
-        mockMvc.perform(post("/api/code/problems")
+        MvcResult result = mockMvc.perform(post("/api/code/problems")
                         .header("Authorization", authToken)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(createDto)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated()).andReturn();
+        String location = result.getResponse().getHeader("Location");
+        Assertions.assertNotNull(location);
+        mockMvc.perform(get(location).header("Authorization", authToken))
+                .andExpect(status().isOk());
     }
 
     @Test
