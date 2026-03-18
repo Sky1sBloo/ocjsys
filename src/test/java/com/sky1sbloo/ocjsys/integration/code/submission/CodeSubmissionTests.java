@@ -1,6 +1,7 @@
 package com.sky1sbloo.ocjsys.integration.code.submission;
 
 import com.sky1sbloo.ocjsys.code.problem.CodeProblem;
+import com.sky1sbloo.ocjsys.code.problem.Difficulties;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
 import com.sky1sbloo.ocjsys.code.submission.dto.CodeSubmissionDto;
 import com.sky1sbloo.ocjsys.integration.Authenticator;
@@ -52,7 +53,7 @@ public class CodeSubmissionTests {
         CodeProblemCreateDto codeProblemCreateDto = CodeProblemCreateDto.builder()
                 .title("Hello world")
                 .tags(List.of())
-                .difficulty("EASY")
+                .difficulty(Difficulties.EASY)
                 .description("Build hello world")
                 .solution("print('Hello, World!')")
                 .build();
@@ -84,7 +85,7 @@ public class CodeSubmissionTests {
         CodeProblemCreateDto codeProblemCreateDto = CodeProblemCreateDto.builder()
                 .title("Hello world")
                 .tags(List.of())
-                .difficulty("EASY")
+                .difficulty(Difficulties.EASY)
                 .description("Build hello world")
                 .solution("print('Hello, World!')")
                 .build();

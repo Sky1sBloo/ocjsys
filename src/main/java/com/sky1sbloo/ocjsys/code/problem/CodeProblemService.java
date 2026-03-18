@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -52,49 +53,42 @@ public class CodeProblemService {
     }
 
     @Transactional
-    public CodeProblem createProblem(CodeProblemCreateDto codeProblem, AuthUser authUser)
+    public CodeProblem createProblem(CodeProblemCreateDto codeProblemDto, AuthUser authUser)
             throws IllegalArgumentException {
         var newProblem = new CodeProblem();
         newProblem.setOwner(authUser.getUserProfile());
-        newProblem.setTitle(codeProblem.title());
-        newProblem.setDescription(codeProblem.description());
-        newProblem.setSolution(codeProblem.solution());
-        newProblem.setTags(codeProblem.tags());
-        newProblem.setDifficulty(codeProblem.difficulty());
+        newProblem.setTitle(codeProblemDto.getTitle());
+        newProblem.setDescription(codeProblemDto.getDescription());
+        newProblem.setSolution(codeProblemDto.getSolution());
+        newProblem.setTags(codeProblemDto.getTags());
+        newProblem.setDifficulty(codeProblemDto.getDifficulty());
         CodeProblem problem = codeProblemRepository.save(newProblem);
-        for (CodeProblemVerifierDto verifierDto : codeProblem.verifiers()) {
-            CodeProblemVerifier verifier = CodeProblemVerifier.builder()
-                    .problem(problem)
-                    .language(CodeLanguage.valueOf(verifierDto.language().toUpperCase())).build();
-            codeProblemVerifierRepository.save(verifier);
+        if (codeProblemDto.getVerifiers() != null && !codeProblemDto.getVerifiers().isEmpty()) {
+            for (CodeProblemVerifierDto verifierDto : codeProblemDto.getVerifiers()) {
+                CodeProblemVerifier verifier = CodeProblemVerifier.builder()
+                        .problem(problem)
+                        .language(CodeLanguage.valueOf(verifierDto.language().toUpperCase())).build();
+                codeProblemVerifierRepository.save(verifier);
+            }
         }
+
         return newProblem;
     }
 
     @Transactional
     public CodeProblem editProblem(CodeProblemEditDto codeProblemEditDto, AuthUser authUser)
             throws AccessDeniedException, IllegalArgumentException {
-        CodeProblem codeProblem = codeProblemRepository.findById(codeProblemEditDto.id()).orElseThrow(
-                () -> new IllegalArgumentException("Problem with id " + codeProblemEditDto.id() + " not found")
+        CodeProblem codeProblem = codeProblemRepository.findById(codeProblemEditDto.getId()).orElseThrow(
+                () -> new IllegalArgumentException("Problem with id " + codeProblemEditDto.getId() + " not found")
         );
         if (!codeProblem.getOwner().getAuthUser().getUsername().equals(authUser.getUsername())) {
             throw new AccessDeniedException("Forbidden");
         }
-        if (codeProblemEditDto.title() != null) {
-            codeProblem.setTitle(codeProblemEditDto.title());
-        }
-        if (codeProblemEditDto.description() != null) {
-            codeProblem.setDescription(codeProblemEditDto.description());
-        }
-        if (codeProblemEditDto.solution() != null) {
-            codeProblem.setSolution(codeProblemEditDto.solution());
-        }
-        if (codeProblemEditDto.tags() != null) {
-            codeProblem.setTags(codeProblemEditDto.tags());
-        }
-        if (codeProblemEditDto.difficulty() != null) {
-            codeProblem.setDifficulty(codeProblemEditDto.difficulty());
-        }
+        Optional.ofNullable(codeProblem.getTitle()).ifPresent(codeProblem::setTitle);
+        Optional.ofNullable(codeProblem.getDescription()).ifPresent(codeProblem::setDescription);
+        Optional.ofNullable(codeProblem.getSolution()).ifPresent(codeProblem::setSolution);
+        Optional.ofNullable(codeProblem.getTags()).ifPresent(codeProblem::setTags);
+        Optional.ofNullable(codeProblem.getDifficulty()).ifPresent(codeProblem::setDifficulty);
         return codeProblemRepository.save(codeProblem);
     }
 

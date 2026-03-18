@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Entity
+@Table(name = "code_problem_verifiers")
 public class CodeProblemVerifier {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

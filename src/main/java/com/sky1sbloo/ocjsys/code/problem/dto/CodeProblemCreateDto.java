@@ -2,17 +2,24 @@ package com.sky1sbloo.ocjsys.code.problem.dto;
 
 import com.sky1sbloo.ocjsys.code.problem.Difficulties;
 import com.sky1sbloo.ocjsys.code.problem.verifier.dto.CodeProblemVerifierDto;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+@Data
 @Builder
-public record CodeProblemCreateDto(
-        String title,
-        List<String> tags,
-        Difficulties difficulty,
-        String description,
-        String solution,
-        List<CodeProblemVerifierDto> verifiers
-)
-{}
+@AllArgsConstructor
+@NoArgsConstructor
+public class CodeProblemCreateDto {
+    private String title;
+    private List<String> tags;
+    private Difficulties difficulty;
+    private String description;
+    private String solution;
+    private Set<CodeProblemVerifierDto> verifiers = new HashSet<>();
+}
