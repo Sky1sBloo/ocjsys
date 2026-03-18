@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SolutionTemplateGetDto {
-    private Long problemId;
-    private CodeLanguage language;
+    protected Long problemId;
+    protected CodeLanguage language;
 }

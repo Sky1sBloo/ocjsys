@@ -5,7 +5,7 @@ import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.Difficulties;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemResponseDto;
-import com.sky1sbloo.ocjsys.code.problem.verifier.dto.CodeProblemVerifierDto;
+import com.sky1sbloo.ocjsys.code.problem.verifier.dto.CodeProblemVerifierCreateDto;
 import com.sky1sbloo.ocjsys.integration.Authenticator;
 import com.sky1sbloo.ocjsys.integration.auth.SampleUsers;
 import org.junit.jupiter.api.Assertions;
@@ -112,7 +112,7 @@ public class CodeProblemTests {
                 Difficulties.MEDIUM,
                 "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
                 "Use a hash map to store the indices of the numbers and check for the complement.",
-                Set.of(new CodeProblemVerifierDto(CodeLanguage.PYTHON, "fn test() {}"))
+                Set.of(new CodeProblemVerifierCreateDto(CodeLanguage.PYTHON, "fn test() {}"))
         );
 
         MvcResult result = mockMvc.perform(post("/api/code/problems")

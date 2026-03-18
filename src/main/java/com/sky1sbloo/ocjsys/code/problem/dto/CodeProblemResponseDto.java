@@ -2,19 +2,22 @@ package com.sky1sbloo.ocjsys.code.problem.dto;
 
 import com.sky1sbloo.ocjsys.code.problem.CodeProblem;
 import com.sky1sbloo.ocjsys.code.problem.Difficulties;
-import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplate;
-import com.sky1sbloo.ocjsys.code.problem.verifier.CodeProblemVerifier;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateDto;
+import com.sky1sbloo.ocjsys.code.problem.verifier.dto.CodeProblemVerifierDto;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class CodeProblemResponseDto {
     private Long id;
@@ -25,9 +28,9 @@ public class CodeProblemResponseDto {
     private String description;
     private String solution;
     @Builder.Default
-    private Set<CodeProblemVerifier> verifiers = new HashSet<>();
+    private Set<CodeProblemVerifierDto> verifiers = new HashSet<>();
     @Builder.Default
-    private Set<SolutionTemplate> solutionTemplates = new HashSet<>();
+    private Set<SolutionTemplateDto> solutionTemplates = new HashSet<>();
 
     public CodeProblemResponseDto(CodeProblem codeProblem) {
         this.id = codeProblem.getId();
@@ -37,7 +40,15 @@ public class CodeProblemResponseDto {
         this.tags = codeProblem.getTags();
         this.description = codeProblem.getDescription();
         this.solution = codeProblem.getSolution();
-        this.solutionTemplates = codeProblem.getSolutionTemplates();
-        this.verifiers = codeProblem.getVerifiers();
+        if (codeProblem.getSolutionTemplates() != null) {
+            this.solutionTemplates = codeProblem.getSolutionTemplates().stream()
+                    .map(SolutionTemplateDto::new)
+                    .collect(Collectors.toSet());
+        }
+        if (codeProblem.getVerifiers() != null) {
+             this.verifiers = codeProblem.getVerifiers().stream()
+                    .map(CodeProblemVerifierDto::new)
+                    .collect(Collectors.toSet());
+        }
     }
 }

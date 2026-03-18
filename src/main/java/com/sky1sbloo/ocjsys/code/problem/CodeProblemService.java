@@ -6,7 +6,7 @@ import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemEditDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemSearchFilterDto;
 import com.sky1sbloo.ocjsys.code.problem.verifier.CodeProblemVerifier;
 import com.sky1sbloo.ocjsys.code.problem.verifier.CodeProblemVerifierRepository;
-import com.sky1sbloo.ocjsys.code.problem.verifier.dto.CodeProblemVerifierDto;
+import com.sky1sbloo.ocjsys.code.problem.verifier.dto.CodeProblemVerifierCreateDto;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -63,7 +63,7 @@ public class CodeProblemService {
         newProblem.setDifficulty(codeProblemDto.getDifficulty());
         CodeProblem problem = codeProblemRepository.save(newProblem);
         if (codeProblemDto.getVerifiers() != null && !codeProblemDto.getVerifiers().isEmpty()) {
-            for (CodeProblemVerifierDto verifierDto : codeProblemDto.getVerifiers()) {
+            for (CodeProblemVerifierCreateDto verifierDto : codeProblemDto.getVerifiers()) {
                 CodeProblemVerifier verifier = CodeProblemVerifier.builder()
                         .problem(problem)
                         .language(verifierDto.language()).build();
