@@ -7,8 +7,10 @@ import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateDt
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
+@Transactional
 @Service
 public class SolutionTemplateService {
     private final CodeProblemRepository codeProblemRepository;
@@ -20,8 +22,6 @@ public class SolutionTemplateService {
     }
 
     public void editSolutionTemplate(SolutionTemplateDto solutionTemplateDto) {
-        SolutionTemplateId templateId = createTemplateIdFromDto(solutionTemplateDto);
-        solutionTemplateRepository.deleteById(templateId);
         SolutionTemplate solutionTemplate = createSolutionTemplateFromDto(solutionTemplateDto);
         solutionTemplateRepository.save(solutionTemplate);
     }
