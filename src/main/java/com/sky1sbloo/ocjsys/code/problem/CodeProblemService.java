@@ -10,6 +10,7 @@ import com.sky1sbloo.ocjsys.code.problem.verifier.CodeProblemVerifierRepository;
 import com.sky1sbloo.ocjsys.code.problem.verifier.dto.CodeProblemVerifierDto;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -44,6 +46,10 @@ public class CodeProblemService {
             }
         }
         return codeProblems;
+    }
+
+    public CodeProblem findProblem(long id) {
+        return codeProblemRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
     @Transactional

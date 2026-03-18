@@ -5,7 +5,6 @@ import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemEditDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemSearchFilterDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,6 +41,13 @@ public class CodeProblemController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping
+    @RequestMapping("/{id}")
+    public ResponseEntity<CodeProblem> getProblem(@PathVariable Long id) {
+        CodeProblem codeProblem = codeProblemService.findProblem(id);
+        return ResponseEntity.ok(codeProblem);
     }
 
     @PostMapping
