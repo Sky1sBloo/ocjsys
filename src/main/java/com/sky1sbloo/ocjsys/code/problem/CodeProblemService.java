@@ -6,7 +6,7 @@ import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemEditDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemSearchFilterDto;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplate;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplateRepository;
-import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateDto;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateCreateDto;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -63,7 +63,7 @@ public class CodeProblemService {
         newProblem.setDifficulty(codeProblemDto.getDifficulty());
         CodeProblem problem = codeProblemRepository.save(newProblem);
         if (codeProblemDto.getSolutionTemplates() != null && !codeProblemDto.getSolutionTemplates().isEmpty()) {
-            for (SolutionTemplateDto solutionTemplateDto : codeProblemDto.getSolutionTemplates()) {
+            for (SolutionTemplateCreateDto solutionTemplateDto : codeProblemDto.getSolutionTemplates()) {
                 SolutionTemplate template = SolutionTemplate.builder()
                         .codeProblem(problem)
                         .language(solutionTemplateDto.getLanguage())

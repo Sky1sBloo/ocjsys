@@ -1,6 +1,7 @@
 package com.sky1sbloo.ocjsys.code.problem.dto;
 
 import com.sky1sbloo.ocjsys.code.problem.Difficulties;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateCreateDto;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +22,7 @@ public class CodeProblemCreateDto {
     private String description;
     private String solution;
     @Builder.Default
-    private Set<SolutionTemplateDto> solutionTemplates = new HashSet<>();
+    private Set<SolutionTemplateCreateDto> solutionTemplates = new HashSet<>();
 
     public CodeProblemCreateDto(
             String title,
