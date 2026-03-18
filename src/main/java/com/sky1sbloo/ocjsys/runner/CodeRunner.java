@@ -2,6 +2,7 @@ package com.sky1sbloo.ocjsys.runner;
 
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.submission.CodeSubmission;
+import com.sky1sbloo.ocjsys.exception.CodeRunnerException;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -17,40 +18,64 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class CodeRunner {
-    public String runCode(CodeSubmission submission) throws IOException, InterruptedException {
+    public String runCode(CodeSubmission submission) throws CodeRunnerException {
         return runCode(submission.getCode(), submission.getLanguage());
     }
 
     public String runCode(String code, CodeLanguage language)
-            throws IOException, InterruptedException, IllegalArgumentException {
+            throws CodeRunnerException {
+        checkDockerRunning();
         if (language != CodeLanguage.PYTHON) {
             throw new IllegalArgumentException("Unsupported language: " + language);
         }
-        String submissionId = UUID.randomUUID().toString();
-        Path submissionDir = Paths.get("/tmp/code_submission/" + submissionId);
-        Files.createDirectories(submissionDir);
-        Path codeFile = submissionDir.resolve("code_submission.py");
-        Files.writeString(codeFile, code);
-        Process process = getProcess(submissionDir);
-        StringBuilder output = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+        try {
+            String submissionId = UUID.randomUUID().toString();
+            Path submissionDir = Paths.get("/tmp/code_submission/" + submissionId);
+            Files.createDirectories(submissionDir);
+            Path codeFile = submissionDir.resolve("code_submission.py");
+            Files.writeString(codeFile, code);
+            Process process = getProcess(submissionDir);
+            StringBuilder output = new StringBuilder();
+
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                }
             }
+
+            boolean finished = process.waitFor(5, TimeUnit.SECONDS);
+
+            if (!finished) {
+                process.destroyForcibly();
+                output.append("Execution timed out\n");
+            }
+
+            deleteDirectory(submissionDir);
+
+            return output.toString();
+        } catch (IOException e) {
+            throw new CodeRunnerException(e);
+        } catch (InterruptedException e) {
+            throw new CodeRunnerException(e);
         }
+    }
 
-        boolean finished = process.waitFor(5, TimeUnit.SECONDS);
-
-        if (!finished) {
-            process.destroyForcibly();
-            output.append("Execution timed out\n");
+    private void checkDockerRunning() throws CodeRunnerException {
+        try {
+            Process process = new ProcessBuilder("docker", "info")
+                    .redirectErrorStream(true)
+                    .start();
+            boolean finished = process.waitFor(3, TimeUnit.SECONDS);
+            if (!finished || process.exitValue() != 0) {
+                throw new CodeRunnerException(CodeRunnerException.Type.DOCKER_ERROR);
+            }
+        } catch (IOException e) {
+            throw new CodeRunnerException(e);
+        } catch (InterruptedException e) {
+            throw new CodeRunnerException(e);
         }
-
-        deleteDirectory(submissionDir);
-
-        return output.toString();
     }
 
     private static @NonNull Process getProcess(Path submissionDir) throws IOException {
