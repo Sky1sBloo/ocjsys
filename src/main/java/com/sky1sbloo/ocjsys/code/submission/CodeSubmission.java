@@ -2,13 +2,10 @@ package com.sky1sbloo.ocjsys.code.submission;
 
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblem;
-import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplate;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
 
 @Getter
 @Setter

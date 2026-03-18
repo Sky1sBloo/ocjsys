@@ -1,10 +1,8 @@
 package com.sky1sbloo.ocjsys.code.problem;
 
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplate;
-import com.sky1sbloo.ocjsys.code.problem.verifier.CodeProblemVerifier;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,8 +31,6 @@ public class CodeProblem {
     private List<String> tags;
     private String description;
     private String solution;
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<CodeProblemVerifier>  verifiers = new HashSet<>();
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "codeProblem", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SolutionTemplate> solutionTemplates = new HashSet<>();
 }

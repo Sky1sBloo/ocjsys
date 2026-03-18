@@ -3,7 +3,6 @@ package com.sky1sbloo.ocjsys.code.problem.dto;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblem;
 import com.sky1sbloo.ocjsys.code.problem.Difficulties;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateDto;
-import com.sky1sbloo.ocjsys.code.problem.verifier.dto.CodeProblemVerifierDto;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,8 +27,6 @@ public class CodeProblemResponseDto {
     private String description;
     private String solution;
     @Builder.Default
-    private Set<CodeProblemVerifierDto> verifiers = new HashSet<>();
-    @Builder.Default
     private Set<SolutionTemplateDto> solutionTemplates = new HashSet<>();
 
     public CodeProblemResponseDto(CodeProblem codeProblem) {
@@ -43,11 +40,6 @@ public class CodeProblemResponseDto {
         if (codeProblem.getSolutionTemplates() != null) {
             this.solutionTemplates = codeProblem.getSolutionTemplates().stream()
                     .map(SolutionTemplateDto::new)
-                    .collect(Collectors.toSet());
-        }
-        if (codeProblem.getVerifiers() != null) {
-             this.verifiers = codeProblem.getVerifiers().stream()
-                    .map(CodeProblemVerifierDto::new)
                     .collect(Collectors.toSet());
         }
     }

@@ -25,4 +25,5 @@ public class SolutionTemplate {
     @Enumerated(EnumType.STRING)
     private CodeLanguage language;
     private String sourceCode;
+    private String verifierSourceCode;
 }

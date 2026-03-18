@@ -5,15 +5,17 @@ import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class SolutionTemplateDto extends SolutionTemplateGetDto {
-    @Getter
-    @Setter
-    private String sourceCode;
+    private String sourceCode;  // shows when loading the problem in the specified language
+    private String verifierSourceCode;  // used to test the source code
 
     public SolutionTemplateDto(SolutionTemplate template) {
         this.language = template.getLanguage();
         this.problemId = template.getCodeProblem().getId();
         this.sourceCode = template.getSourceCode();
+        this.verifierSourceCode = template.getVerifierSourceCode();
     }
 }
 
