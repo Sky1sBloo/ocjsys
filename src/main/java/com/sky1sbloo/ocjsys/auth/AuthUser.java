@@ -5,10 +5,7 @@ import com.sky1sbloo.ocjsys.auth.role.Permission;
 import com.sky1sbloo.ocjsys.auth.role.Role;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,12 +16,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
 @Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
+@Getter
+@Setter
 public class AuthUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

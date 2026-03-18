@@ -5,12 +5,15 @@ import com.sky1sbloo.ocjsys.code.problem.verifier.CodeProblemVerifier;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "code_problems")
 public class CodeProblem {

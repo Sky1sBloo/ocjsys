@@ -55,7 +55,7 @@ public class CodeProblemController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('CREATE_CODE_PROBLEMS')")
-    public ResponseEntity<CodeProblem> createProblem(
+    public ResponseEntity<CodeProblemResponseDto> createProblem(
             @RequestBody CodeProblemCreateDto codeProblem,
             @AuthenticationPrincipal AuthUser authUser) {
         if (authUser == null) {
@@ -66,7 +66,7 @@ public class CodeProblemController {
             CodeProblem problem = codeProblemService.createProblem(codeProblem, authUser);
             URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                     .buildAndExpand(problem.getId()).toUri();
-            return ResponseEntity.created(location).body(problem);
+            return ResponseEntity.created(location).body(new CodeProblemResponseDto(problem));
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().build();
         }
