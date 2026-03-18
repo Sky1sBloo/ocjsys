@@ -3,7 +3,7 @@ package com.sky1sbloo.ocjsys.code.problem.solutiontemplate;
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblem;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblemRepository;
-import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateCreateDto;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateDto;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateGetDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -35,12 +35,12 @@ public class SolutionTemplateService {
         return solutionTemplateRepository.findByCodeProblem_IdAndLanguage(problemId, language);
     }
 
-    public SolutionTemplate addSolutionTemplate(SolutionTemplateCreateDto solutionTemplateCreateDto) {
+    public SolutionTemplate addSolutionTemplate(SolutionTemplateDto solutionTemplateCreateDto) {
         SolutionTemplate solutionTemplate = createSolutionTemplateFromDto(solutionTemplateCreateDto);
         return solutionTemplateRepository.save(solutionTemplate);
     }
 
-    public void editSolutionTemplate(SolutionTemplateCreateDto solutionTemplateCreateDto) {
+    public void editSolutionTemplate(SolutionTemplateDto solutionTemplateCreateDto) {
         SolutionTemplate solutionTemplate = createSolutionTemplateFromDto(solutionTemplateCreateDto);
         solutionTemplateRepository.save(solutionTemplate);
     }
@@ -50,7 +50,7 @@ public class SolutionTemplateService {
         solutionTemplateRepository.deleteById(templateId);
     }
 
-    private SolutionTemplate createSolutionTemplateFromDto(SolutionTemplateCreateDto solutionTemplateCreateDto)
+    private SolutionTemplate createSolutionTemplateFromDto(SolutionTemplateDto solutionTemplateCreateDto)
             throws EntityNotFoundException, IllegalArgumentException {
         CodeProblem problem = codeProblemRepository.findById(solutionTemplateCreateDto.getProblemId()).orElseThrow(
                 () -> new EntityNotFoundException("Code problem with id: " + solutionTemplateCreateDto.getProblemId() +

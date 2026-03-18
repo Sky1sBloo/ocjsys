@@ -1,7 +1,7 @@
 package com.sky1sbloo.ocjsys.code.problem.solutiontemplate;
 
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
-import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateCreateDto;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateDto;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateGetDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +30,7 @@ public class SolutionTemplateController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> addSolutionTemplate(@RequestBody SolutionTemplateCreateDto solutionTemplateCreateDto) {
+    public ResponseEntity<Void> addSolutionTemplate(@RequestBody SolutionTemplateDto solutionTemplateCreateDto) {
         SolutionTemplate template = solutionTemplateService.addSolutionTemplate(solutionTemplateCreateDto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .queryParam("language", template.getLanguage())
@@ -40,7 +40,7 @@ public class SolutionTemplateController {
 
     @PutMapping
     public ResponseEntity<Void> updateSolutionTemplate(
-            @RequestBody SolutionTemplateCreateDto solutionTemplateCreateDto) {
+            @RequestBody SolutionTemplateDto solutionTemplateCreateDto) {
         solutionTemplateService.editSolutionTemplate(solutionTemplateCreateDto);
         return ResponseEntity.noContent().build();
     }

@@ -37,17 +37,13 @@ public class CodeProblemController {
                 .tags(tags)
                 .difficulties(difficulties)
                 .build();
-        try {
-            var filter = codeProblemService.convertToFilter(codeProblemDto);
-            var problems = codeProblemService.findProblems(filter);
-            Set<CodeProblemResponseDto> response = new HashSet<>();
-            for (CodeProblem problem : problems) {
-                response.add(new CodeProblemResponseDto(problem));
-            }
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().build();
+        var filter = codeProblemService.convertToFilter(codeProblemDto);
+        var problems = codeProblemService.findProblems(filter);
+        Set<CodeProblemResponseDto> response = new HashSet<>();
+        for (CodeProblem problem : problems) {
+            response.add(new CodeProblemResponseDto(problem));
         }
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
@@ -81,7 +77,7 @@ public class CodeProblemController {
     public ResponseEntity<CodeProblem> updateProblem(
             @RequestBody CodeProblemEditDto codeProblem,
             @AuthenticationPrincipal AuthUser authUser
-            ) {
+    ) {
         if (authUser == null) {
             return ResponseEntity.status(401).build();
         }

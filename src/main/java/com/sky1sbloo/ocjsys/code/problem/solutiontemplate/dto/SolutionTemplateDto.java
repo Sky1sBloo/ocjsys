@@ -4,7 +4,7 @@ import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
-public class SolutionTemplateCreateDto extends SolutionTemplateGetDto {
+public class SolutionTemplateDto extends SolutionTemplateGetDto {
     @Getter
     @Setter
     private String sourceCode;
