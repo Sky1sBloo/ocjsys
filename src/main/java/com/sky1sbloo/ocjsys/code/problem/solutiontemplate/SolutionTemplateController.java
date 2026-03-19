@@ -2,6 +2,7 @@ package com.sky1sbloo.ocjsys.code.problem.solutiontemplate;
 
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateDto;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateEditDto;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateGetDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -38,10 +39,11 @@ public class SolutionTemplateController {
         return ResponseEntity.created(location).build();
     }
 
-    @PutMapping
+    @PutMapping("/{problemId}")
     public ResponseEntity<Void> updateSolutionTemplate(
-            @RequestBody SolutionTemplateDto solutionTemplateCreateDto) {
-        solutionTemplateService.editSolutionTemplate(solutionTemplateCreateDto);
+            @PathVariable Long problemId,
+            @RequestBody SolutionTemplateEditDto solutionTemplateEditDto) {
+        solutionTemplateService.editSolutionTemplate(problemId, solutionTemplateEditDto);
         return ResponseEntity.noContent().build();
     }
 

@@ -4,6 +4,7 @@ import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblem;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblemRepository;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateDto;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateEditDto;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateGetDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +41,17 @@ public class SolutionTemplateService {
         return solutionTemplateRepository.save(solutionTemplate);
     }
 
-    public void editSolutionTemplate(SolutionTemplateDto solutionTemplateCreateDto) {
-        SolutionTemplate solutionTemplate = createSolutionTemplateFromDto(solutionTemplateCreateDto);
+    public void editSolutionTemplate(Long id, SolutionTemplateEditDto solutionTemplateEditDto) {
+        CodeProblem problem = codeProblemRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Code problem with id: " + id +
+                        " not found")
+        );
+        SolutionTemplate solutionTemplate = SolutionTemplate.builder()
+                .codeProblem(problem)
+                .language(solutionTemplateEditDto.getLanguage())
+                .sourceCode(solutionTemplateEditDto.getSourceCode())
+                .verifierSourceCode(solutionTemplateEditDto.getVerifierSourceCode())
+                .build();
         solutionTemplateRepository.save(solutionTemplate);
     }
 
@@ -59,7 +69,9 @@ public class SolutionTemplateService {
         return SolutionTemplate.builder()
                 .codeProblem(problem)
                 .language(solutionTemplateCreateDto.getLanguage())
-                .sourceCode(solutionTemplateCreateDto.getSourceCode()).build();
+                .sourceCode(solutionTemplateCreateDto.getSourceCode())
+                .verifierSourceCode(solutionTemplateCreateDto.getVerifierSourceCode())
+                .build();
     }
 
     private SolutionTemplateId createTemplateIdFromDto(SolutionTemplateGetDto solutionTemplateGetDto)
