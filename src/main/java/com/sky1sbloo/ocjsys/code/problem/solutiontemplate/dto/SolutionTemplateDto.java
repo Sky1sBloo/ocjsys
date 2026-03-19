@@ -9,6 +9,7 @@ import lombok.*;
  * Different from {@link SolutionTemplateCreateDto} where it is used by initial code problem creation
  */
 @Getter
+@NoArgsConstructor
 @Setter
 public class SolutionTemplateDto {
     protected Long problemId;
