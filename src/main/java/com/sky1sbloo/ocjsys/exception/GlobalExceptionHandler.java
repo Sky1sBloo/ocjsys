@@ -39,6 +39,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponseDto(ex.getMessage()));
     }
 
+    /*
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleOtherExceptions(Exception ex) throws Exception {
         if (ex instanceof ResponseStatusException
@@ -49,5 +50,5 @@ public class GlobalExceptionHandler {
         log.error("Unhandled exception", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponseDto("An unexpected error occurred"));
-    }
+    } */
 }
