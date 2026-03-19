@@ -49,7 +49,7 @@ public class SolutionTemplateTests {
     }
 
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() {
         sampleUsers.createUserAdmin();
     }
 
@@ -97,6 +97,10 @@ public class SolutionTemplateTests {
     }
 
     @Test
+    public void createSolutionTemplateNotOwnerShouldFail() throws Exception {
+    }
+
+    @Test
     public void editSolutionTemplateShouldSucceed() throws Exception {
         String authToken = authenticator.loginAndGetToken(sampleUsers.getAdminLogin());
         CodeProblemResponseDto codeProblemResponseDto = initializeSampleProblem(authToken);
@@ -138,7 +142,7 @@ public class SolutionTemplateTests {
 
     @Test
     public void editSolutionTemplateNotOwnerShouldFail() throws Exception {
-        String authToken = authenticator.loginAndGetToken(sampleUsers.getAdminLogin());
+        String authToken = authenticator.loginAndGetToken(sampleUsers.getUserLogin());
         CodeProblemResponseDto codeProblemResponseDto = initializeSampleProblem(authToken);
 
         SolutionTemplateDto solutionTemplateDto = new SolutionTemplateDto(
@@ -161,10 +165,7 @@ public class SolutionTemplateTests {
         LoginRequest otherUser = LoginRequest.builder()
                 .username("otherUser")
                 .password("1234").build();
-        sampleUsers.createUser(RegisterRequest.builder()
-                .username(otherUser.getUsername())
-                .password(otherUser.getPassword())
-                .name("Otheruser").build(), Set.of(sampleUsers.getRole(Roles.USER)));
+        sampleUsers.createTestUser(otherUser.getUsername(), otherUser.getPassword(), Set.of(Roles.USER));
 
         String otherAccountAuthToken = authenticator.loginAndGetToken(otherUser);
         String putUrl = ServletUriComponentsBuilder.fromUriString(location)

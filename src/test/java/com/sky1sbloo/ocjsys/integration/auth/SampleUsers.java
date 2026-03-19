@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Used for initializing sample default and custom users
@@ -87,6 +88,29 @@ public class SampleUsers {
         AuthUser user = authUserRepository.save(newUser);
         UserProfile adminProfile = UserProfile.builder()
                 .name(registerRequest.getName())
+                .authUser(user).build();
+        userProfileRepository.save(adminProfile);
+        user.setUserProfile(adminProfile);
+        authUserRepository.save(user);
+    }
+
+    /**
+     * Used for enum roles creation
+     */
+    public void createTestUser(String username, String password, Set<Roles> roles) {
+        if (authUserRepository.existsByUsername(username)) {
+            return;
+        }
+        Set<Role> roleSet = roles.stream().map(this::getRole).collect(Collectors.toSet());
+
+        AuthUser newUser = AuthUser.builder()
+                .username(username)
+                .password(passwordEncoder.encode(password))
+                .roles(roleSet)
+                .build();
+        AuthUser user = authUserRepository.save(newUser);
+        UserProfile adminProfile = UserProfile.builder()
+                .name("Test User")
                 .authUser(user).build();
         userProfileRepository.save(adminProfile);
         user.setUserProfile(adminProfile);
