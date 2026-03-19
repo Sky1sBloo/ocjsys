@@ -6,6 +6,7 @@ import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateEd
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateGetDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -31,6 +32,7 @@ public class SolutionTemplateController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('CREATE_CODE_PROBLEMS')")
     public ResponseEntity<Void> addSolutionTemplate(@RequestBody SolutionTemplateDto solutionTemplateCreateDto) {
         SolutionTemplate template = solutionTemplateService.addSolutionTemplate(solutionTemplateCreateDto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
@@ -40,6 +42,7 @@ public class SolutionTemplateController {
     }
 
     @PutMapping("/{problemId}")
+    @PreAuthorize("hasAuthority('CREATE_CODE_PROBLEMS')")
     public ResponseEntity<Void> updateSolutionTemplate(
             @PathVariable Long problemId,
             @RequestBody SolutionTemplateEditDto solutionTemplateEditDto) {
@@ -48,9 +51,9 @@ public class SolutionTemplateController {
     }
 
     @DeleteMapping
+    @PreAuthorize("hasAuthority('CREATE_CODE_PROBLEMS')")
     public ResponseEntity<Void> deleteSolutionTemplate(SolutionTemplateGetDto solutionTemplateGetDto) {
         solutionTemplateService.deleteSolutionTemplate(solutionTemplateGetDto);
         return ResponseEntity.noContent().build();
     }
-
 }
