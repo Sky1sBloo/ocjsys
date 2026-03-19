@@ -1,5 +1,8 @@
 package com.sky1sbloo.ocjsys.integration.code.problem.solutiontemplate;
 
+import com.sky1sbloo.ocjsys.auth.dto.LoginRequest;
+import com.sky1sbloo.ocjsys.auth.dto.RegisterRequest;
+import com.sky1sbloo.ocjsys.auth.role.Roles;
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.Difficulties;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
@@ -18,12 +21,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Set;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -64,9 +67,9 @@ public class SolutionTemplateTests {
         );
 
         MvcResult createResult = mockMvc.perform(post("/api/code/problems/templates")
-                .header("Authorization", authToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(solutionTemplateDto)))
+                        .header("Authorization", authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(solutionTemplateDto)))
                 .andExpect(status().isCreated()).andReturn();
         String location = createResult.getResponse().getHeader("Location");
         Assertions.assertNotNull(location);
@@ -77,15 +80,112 @@ public class SolutionTemplateTests {
     }
 
     @Test
-    public void createSolutionTemplateNoProblemShouldFail() throws Exception {}
+    public void createSolutionTemplateNoProblemShouldFail() throws Exception {
+        String authToken = authenticator.loginAndGetToken(sampleUsers.getAdminLogin());
+        SolutionTemplateDto solutionTemplateDto = new SolutionTemplateDto(
+                0L,
+                CodeLanguage.PYTHON,
+                "def test():\n\tpass",
+                "test()"
+        );
+
+        mockMvc.perform(post("/api/code/problems/templates")
+                        .header("Authorization", authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(solutionTemplateDto)))
+                .andExpect(status().isNotFound());
+    }
 
     @Test
-    public void editSolutionTemplateShouldSucceed() throws Exception {}
+    public void editSolutionTemplateShouldSucceed() throws Exception {
+        String authToken = authenticator.loginAndGetToken(sampleUsers.getAdminLogin());
+        CodeProblemResponseDto codeProblemResponseDto = initializeSampleProblem(authToken);
+
+        SolutionTemplateDto solutionTemplateDto = new SolutionTemplateDto(
+                codeProblemResponseDto.getId(),
+                CodeLanguage.PYTHON,
+                "def test():\n\tpass",
+                "test()"
+        );
+
+        MvcResult createResult = mockMvc.perform(post("/api/code/problems/templates")
+                        .header("Authorization", authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(solutionTemplateDto)))
+                .andExpect(status().isCreated()).andReturn();
+        String location = createResult.getResponse().getHeader("Location");
+        Assertions.assertNotNull(location);
+        String putUrl = ServletUriComponentsBuilder.fromUriString(location)
+                .replaceQuery(null).build().toUriString();
+        SolutionTemplateDto solutionTemplateEditDto = new SolutionTemplateDto(
+                codeProblemResponseDto.getId(),
+                CodeLanguage.PYTHON,
+                "def potato():\n\tpass",
+                "potato()"
+        );
+        mockMvc.perform(put(putUrl)
+                        .header("Authorization", authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(solutionTemplateEditDto))
+                )
+                .andExpect(status().isNoContent());
+        mockMvc.perform(get(location).header("Authorization", authToken))
+                .andExpect(jsonPath("$.language").value("PYTHON"))
+                .andExpect(jsonPath("$.sourceCode").value(solutionTemplateEditDto.getSourceCode()))
+                .andExpect(jsonPath("$.verifierSourceCode")
+                        .value(solutionTemplateEditDto.getVerifierSourceCode()));
+    }
 
     @Test
-    public void editSolutionTemplateNotOwnerShouldFail() throws Exception {}
+    public void editSolutionTemplateNotOwnerShouldFail() throws Exception {
+        String authToken = authenticator.loginAndGetToken(sampleUsers.getAdminLogin());
+        CodeProblemResponseDto codeProblemResponseDto = initializeSampleProblem(authToken);
+
+        SolutionTemplateDto solutionTemplateDto = new SolutionTemplateDto(
+                codeProblemResponseDto.getId(),
+                CodeLanguage.PYTHON,
+                "def test():\n\tpass",
+                "test()"
+        );
+
+
+        MvcResult createResult = mockMvc.perform(post("/api/code/problems/templates")
+                        .header("Authorization", authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(solutionTemplateDto)))
+                .andExpect(status().isCreated()).andReturn();
+        String location = createResult.getResponse().getHeader("Location");
+        Assertions.assertNotNull(location);
+
+        // for creating another user
+        LoginRequest otherUser = LoginRequest.builder()
+                .username("otherUser")
+                .password("1234").build();
+        sampleUsers.createUser(RegisterRequest.builder()
+                .username(otherUser.getUsername())
+                .password(otherUser.getPassword())
+                .name("Otheruser").build(), Set.of(sampleUsers.getRole(Roles.ADMIN)));
+
+        String otherAccountAuthToken = authenticator.loginAndGetToken(otherUser);
+        String putUrl = ServletUriComponentsBuilder.fromUriString(location)
+                .replaceQuery(null).build().toUriString();
+        SolutionTemplateDto solutionTemplateEditDto = new SolutionTemplateDto(
+                codeProblemResponseDto.getId(),
+                CodeLanguage.PYTHON,
+                "def potato():\n\tpass",
+                "potato()"
+        );
+        mockMvc.perform(put(putUrl)
+                        .header("Authorization", otherAccountAuthToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(solutionTemplateEditDto))
+                )
+                .andExpect(status().isForbidden());
+    }
+
     @Test
-    public void editSolutionTemplateNoProblemShouldFail() throws Exception {}
+    public void editSolutionTemplateNoProblemShouldFail() throws Exception {
+    }
 
     private CodeProblemResponseDto initializeSampleProblem(String authToken) throws Exception {
         CodeProblemCreateDto createDto = new CodeProblemCreateDto(
