@@ -68,7 +68,7 @@ public class SolutionTemplateTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(solutionTemplateDto)))
                 .andExpect(status().isCreated()).andReturn();
-        String location = createResult.getResponse().getHeader("Location") + "?language=PYTHON";
+        String location = createResult.getResponse().getHeader("Location");
         Assertions.assertNotNull(location);
 
         mockMvc.perform(get(location).header("Authorization", authToken))
