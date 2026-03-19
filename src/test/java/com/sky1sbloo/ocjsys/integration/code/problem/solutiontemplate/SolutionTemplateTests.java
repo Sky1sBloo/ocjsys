@@ -164,7 +164,7 @@ public class SolutionTemplateTests {
         sampleUsers.createUser(RegisterRequest.builder()
                 .username(otherUser.getUsername())
                 .password(otherUser.getPassword())
-                .name("Otheruser").build(), Set.of(sampleUsers.getRole(Roles.ADMIN)));
+                .name("Otheruser").build(), Set.of(sampleUsers.getRole(Roles.USER)));
 
         String otherAccountAuthToken = authenticator.loginAndGetToken(otherUser);
         String putUrl = ServletUriComponentsBuilder.fromUriString(location)
