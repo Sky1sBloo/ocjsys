@@ -7,7 +7,6 @@ import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemResponseDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemSearchFilterDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -85,7 +84,7 @@ public class CodeProblemController {
         try {
             CodeProblem problem = codeProblemService.editProblem(codeProblem, authUser);
             return ResponseEntity.ok().body(problem);
-        } catch (AccessDeniedException | IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().build();
         }
     }
