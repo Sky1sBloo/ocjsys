@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Builder
 public class CodeProblemResponseDto {
     private Long id;
-    private UserProfile owner;
+    private String owner;
     private String title;
     private Difficulties difficulty;
     private Set<String> tags;
@@ -30,7 +30,7 @@ public class CodeProblemResponseDto {
 
     public CodeProblemResponseDto(CodeProblem codeProblem) {
         this.id = codeProblem.getId();
-        this.owner = codeProblem.getOwner();
+        this.owner = codeProblem.getOwner().getAuthUser().getUsername();
         this.title = codeProblem.getTitle();
         this.difficulty = codeProblem.getDifficulty();
         this.tags = codeProblem.getTags();
