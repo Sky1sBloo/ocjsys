@@ -92,4 +92,8 @@ public class SampleUsers {
         user.setUserProfile(adminProfile);
         authUserRepository.save(user);
     }
+
+    public Role getRole(Roles role) {
+        return roleRepository.findByName(Roles.USER).orElseThrow();
+    }
 }
