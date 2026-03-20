@@ -9,9 +9,11 @@ import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateEd
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateGetDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Set;
 
@@ -22,11 +24,10 @@ public class SolutionTemplateService {
     private final CodeProblemRepository codeProblemRepository;
     private final SolutionTemplateRepository solutionTemplateRepository;
 
-    public SolutionTemplate getSolutionTemplateById(SolutionTemplateGetDto solutionTemplateGetDto)
-            throws EntityNotFoundException {
+    public SolutionTemplate getSolutionTemplateById(SolutionTemplateGetDto solutionTemplateGetDto) {
         SolutionTemplateId templateId = createTemplateIdFromDto(solutionTemplateGetDto);
         return solutionTemplateRepository.findById(templateId)
-                .orElseThrow(() -> new EntityNotFoundException(templateId.toString()));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     public Set<SolutionTemplate> getSolutionTemplatesOfProblem(Long problemId)
@@ -69,7 +70,8 @@ public class SolutionTemplateService {
             throws AccessDeniedException {
         SolutionTemplateId templateId = createTemplateIdFromDto(solutionTemplateGetDto);
         CodeProblem problem = codeProblemRepository.findById(solutionTemplateGetDto.getProblemId()).orElseThrow(
-                () -> new EntityNotFoundException("Code problem with id: " + solutionTemplateGetDto.getProblemId() +
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Code problem with id: " + solutionTemplateGetDto.getProblemId() +
                         " not found")
         );
         if (!userOwnsCodeProblem(user, problem)) {
@@ -84,10 +86,10 @@ public class SolutionTemplateService {
     }
 
     private SolutionTemplate createSolutionTemplateFromDto(SolutionTemplateDto solutionTemplateCreateDto)
-            throws EntityNotFoundException, IllegalArgumentException {
+            throws IllegalArgumentException {
         CodeProblem problem = codeProblemRepository.findById(solutionTemplateCreateDto.getProblemId()).orElseThrow(
-                () -> new EntityNotFoundException("Code problem with id: " + solutionTemplateCreateDto.getProblemId() +
-                        " not found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        solutionTemplateCreateDto.getProblemId() + " not found")
         );
         return SolutionTemplate.builder()
                 .codeProblem(problem)
@@ -98,11 +100,10 @@ public class SolutionTemplateService {
     }
 
     private SolutionTemplateId createTemplateIdFromDto(SolutionTemplateGetDto solutionTemplateGetDto)
-            throws EntityNotFoundException, IllegalArgumentException {
+            throws IllegalArgumentException {
         CodeProblem problem = codeProblemRepository.findById(solutionTemplateGetDto.getProblemId()).orElseThrow(
-                () -> new EntityNotFoundException("Code problem with id: " + solutionTemplateGetDto.getProblemId() +
-                        " not found")
-        );
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        solutionTemplateGetDto.getProblemId() + " not found"));
         return new SolutionTemplateId(problem, solutionTemplateGetDto.getLanguage());
     }
 }

@@ -55,7 +55,7 @@ public class SolutionTemplateTests {
 
     @Test
     public void createSolutionTemplateShouldSucceed() throws Exception {
-        String authToken = authenticator.loginAndGetToken(sampleUsers.getAdminLogin());
+        String authToken = authenticator.loginAndGetToken(sampleUsers.getUserLogin());
         CodeProblemResponseDto codeProblemResponseDto = initializeSampleProblem(authToken);
 
 
@@ -81,7 +81,7 @@ public class SolutionTemplateTests {
 
     @Test
     public void createSolutionTemplateNoProblemShouldFail() throws Exception {
-        String authToken = authenticator.loginAndGetToken(sampleUsers.getAdminLogin());
+        String authToken = authenticator.loginAndGetToken(sampleUsers.getUserLogin());
         SolutionTemplateDto solutionTemplateDto = new SolutionTemplateDto(
                 0L,
                 CodeLanguage.PYTHON,
