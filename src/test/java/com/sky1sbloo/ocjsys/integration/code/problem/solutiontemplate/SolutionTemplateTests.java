@@ -1,7 +1,6 @@
 package com.sky1sbloo.ocjsys.integration.code.problem.solutiontemplate;
 
 import com.sky1sbloo.ocjsys.auth.dto.LoginRequest;
-import com.sky1sbloo.ocjsys.auth.dto.RegisterRequest;
 import com.sky1sbloo.ocjsys.auth.role.Roles;
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.Difficulties;
@@ -21,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tools.jackson.databind.ObjectMapper;
 
@@ -58,19 +58,9 @@ public class SolutionTemplateTests {
         String authToken = authenticator.loginAndGetToken(sampleUsers.getUserLogin());
         CodeProblemResponseDto codeProblemResponseDto = initializeSampleProblem(authToken);
 
-
-        SolutionTemplateDto solutionTemplateDto = new SolutionTemplateDto(
-                codeProblemResponseDto.getId(),
-                CodeLanguage.PYTHON,
-                "def test():\n\tpass",
-                "test()"
-        );
-
-        MvcResult createResult = mockMvc.perform(post("/api/code/problems/templates")
-                        .header("Authorization", authToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(solutionTemplateDto)))
-                .andExpect(status().isCreated()).andReturn();
+        MvcResult createResult =
+                initializeTestSolutionTemplate(codeProblemResponseDto.getId(), authToken)
+                        .andExpect(status().isCreated()).andReturn();
         String location = createResult.getResponse().getHeader("Location");
         Assertions.assertNotNull(location);
 
@@ -98,6 +88,18 @@ public class SolutionTemplateTests {
 
     @Test
     public void createSolutionTemplateNotOwnerShouldFail() throws Exception {
+        String authToken = authenticator.loginAndGetToken(sampleUsers.getUserLogin());
+        CodeProblemResponseDto codeProblemResponseDto = initializeSampleProblem(authToken);
+
+        LoginRequest otherUser = LoginRequest.builder()
+                .username("otherUser")
+                .password("1234").build();
+        sampleUsers.createTestUser(otherUser.getUsername(), otherUser.getPassword(), Set.of(Roles.USER));
+
+        String otherAccountAuthToken = authenticator.loginAndGetToken(otherUser);
+        initializeTestSolutionTemplate(codeProblemResponseDto.getId(), otherAccountAuthToken)
+                .andExpect(status().isForbidden());
+
     }
 
     @Test
@@ -105,17 +107,7 @@ public class SolutionTemplateTests {
         String authToken = authenticator.loginAndGetToken(sampleUsers.getAdminLogin());
         CodeProblemResponseDto codeProblemResponseDto = initializeSampleProblem(authToken);
 
-        SolutionTemplateDto solutionTemplateDto = new SolutionTemplateDto(
-                codeProblemResponseDto.getId(),
-                CodeLanguage.PYTHON,
-                "def test():\n\tpass",
-                "test()"
-        );
-
-        MvcResult createResult = mockMvc.perform(post("/api/code/problems/templates")
-                        .header("Authorization", authToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(solutionTemplateDto)))
+        MvcResult createResult = initializeTestSolutionTemplate(codeProblemResponseDto.getId(), authToken)
                 .andExpect(status().isCreated()).andReturn();
         String location = createResult.getResponse().getHeader("Location");
         Assertions.assertNotNull(location);
@@ -145,18 +137,7 @@ public class SolutionTemplateTests {
         String authToken = authenticator.loginAndGetToken(sampleUsers.getUserLogin());
         CodeProblemResponseDto codeProblemResponseDto = initializeSampleProblem(authToken);
 
-        SolutionTemplateDto solutionTemplateDto = new SolutionTemplateDto(
-                codeProblemResponseDto.getId(),
-                CodeLanguage.PYTHON,
-                "def test():\n\tpass",
-                "test()"
-        );
-
-
-        MvcResult createResult = mockMvc.perform(post("/api/code/problems/templates")
-                        .header("Authorization", authToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(solutionTemplateDto)))
+        MvcResult createResult = initializeTestSolutionTemplate(codeProblemResponseDto.getId(), authToken)
                 .andExpect(status().isCreated()).andReturn();
         String location = createResult.getResponse().getHeader("Location");
         Assertions.assertNotNull(location);
@@ -184,10 +165,6 @@ public class SolutionTemplateTests {
                 .andExpect(status().isForbidden());
     }
 
-    @Test
-    public void editSolutionTemplateNoProblemShouldFail() throws Exception {
-    }
-
     private CodeProblemResponseDto initializeSampleProblem(String authToken) throws Exception {
         CodeProblemCreateDto createDto = new CodeProblemCreateDto(
                 "Two Sum",
@@ -206,5 +183,19 @@ public class SolutionTemplateTests {
         MvcResult getResult = mockMvc.perform(get(location).header("Authorization", authToken))
                 .andExpect(status().isOk()).andReturn();
         return objectMapper.readValue(getResult.getResponse().getContentAsString(), CodeProblemResponseDto.class);
+    }
+
+    private ResultActions initializeTestSolutionTemplate(long problemId, String authToken) throws Exception {
+        SolutionTemplateDto solutionTemplateDto = new SolutionTemplateDto(
+                problemId,
+                CodeLanguage.PYTHON,
+                "def test():\n\tpass",
+                "test()"
+        );
+
+        return mockMvc.perform(post("/api/code/problems/templates")
+                        .header("Authorization", authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(solutionTemplateDto)));
     }
 }
