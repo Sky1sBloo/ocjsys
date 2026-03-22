@@ -1,8 +1,12 @@
 package com.sky1sbloo.ocjsys.runner;
 
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
+import com.sky1sbloo.ocjsys.code.problem.CodeProblem;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplate;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplateService;
 import com.sky1sbloo.ocjsys.code.submission.CodeSubmission;
 import com.sky1sbloo.ocjsys.exception.CodeRunnerException;
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -16,10 +20,19 @@ import java.util.Comparator;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@RequiredArgsConstructor
 @Component
 public class CodeRunner {
+    private final SolutionTemplateService solutionTemplateService;
+
+    /**
+     * This is used to run the code with the verifier
+     */
     public String runCode(CodeSubmission submission) throws CodeRunnerException {
-        return runCode(submission.getCode(), submission.getLanguage());
+        SolutionTemplate solutionTemplate = solutionTemplateService
+                .getSolutionTemplateOfProblem(submission.getProblem().getId(),  submission.getLanguage());
+        String combinedCode = submission.getCode() + "\n" + solutionTemplate.getVerifierSourceCode();
+        return runCode(combinedCode, submission.getLanguage());
     }
 
     public String runCode(String code, CodeLanguage language)
