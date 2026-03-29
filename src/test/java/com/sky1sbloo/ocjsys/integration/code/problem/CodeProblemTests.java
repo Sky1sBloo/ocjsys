@@ -97,7 +97,7 @@ public class CodeProblemTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Two Sum"))
                 .andExpect(jsonPath("$[0].difficulty").value("EASY"))
-                .andExpect(jsonPath("$[0].owner.name").value(loginResponse.getName()));
+                .andExpect(jsonPath("$[0].owner").value("user"));
     }
 
     @Test
