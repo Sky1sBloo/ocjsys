@@ -3,18 +3,13 @@ package com.sky1sbloo.ocjsys.exception;
 import com.sky1sbloo.ocjsys.exception.dto.ErrorResponseDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @RestControllerAdvice
-@Profile("dev")
 public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponseDto> handleIllegalArgument(IllegalArgumentException ex) {
@@ -28,15 +23,22 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CodeRunnerException.class)
     public ResponseEntity<ErrorResponseDto> handleCodeRunner(CodeRunnerException ex) {
-        if (ex.getType() == CodeRunnerException.Type.UNSUPPORTED_LANGUAGE) {
+        if (ex.getType() == CodeRunnerException.Type.UNSUPPORTED_LANGUAGE
+                || ex.getType() == CodeRunnerException.Type.EXECUTION_FAILED
+                || ex.getType() == CodeRunnerException.Type.EXECUTION_TIMED_OUT) {
             return ResponseEntity.badRequest().body(new ErrorResponseDto(ex.getMessage()));
         }
+
         log.error("Code Runner Exception", ex);
+        if (ex.getType() == CodeRunnerException.Type.DOCKER_ERROR) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(new ErrorResponseDto(ex.getMessage()));
+        }
         if (ex.getType() == CodeRunnerException.Type.INTERRUPTED) {
             Thread.currentThread().interrupt();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponseDto(ex.getMessage()));
         }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponseDto(ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponseDto(ex.getMessage()));
     }
 
     /*

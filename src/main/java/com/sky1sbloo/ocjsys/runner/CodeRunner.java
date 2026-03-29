@@ -1,7 +1,6 @@
 package com.sky1sbloo.ocjsys.runner;
 
 import com.sky1sbloo.ocjsys.code.CodeLanguage;
-import com.sky1sbloo.ocjsys.code.problem.CodeProblem;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplate;
 import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplateService;
 import com.sky1sbloo.ocjsys.code.submission.CodeSubmission;
@@ -37,19 +36,22 @@ public class CodeRunner {
 
     public String runCode(String code, CodeLanguage language)
             throws CodeRunnerException {
-        checkDockerRunning();
         if (language != CodeLanguage.PYTHON) {
-            throw new IllegalArgumentException("Unsupported language: " + language);
+            throw new CodeRunnerException("Unsupported language: " + language,
+                    CodeRunnerException.Type.UNSUPPORTED_LANGUAGE);
         }
+        checkDockerRunning();
+
+        Path submissionDir = null;
         try {
             String submissionId = UUID.randomUUID().toString();
-            Path submissionDir = Paths.get("/tmp/code_submission/" + submissionId);
+            submissionDir = Paths.get("/tmp/code_submission/" + submissionId);
             Files.createDirectories(submissionDir);
             Path codeFile = submissionDir.resolve("code_submission.py");
             Files.writeString(codeFile, code);
+
             Process process = getProcess(submissionDir);
             StringBuilder output = new StringBuilder();
-
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream()))) {
                 String line;
@@ -59,19 +61,28 @@ public class CodeRunner {
             }
 
             boolean finished = process.waitFor(5, TimeUnit.SECONDS);
-
             if (!finished) {
                 process.destroyForcibly();
-                output.append("Execution timed out\n");
+                throw new CodeRunnerException(CodeRunnerException.Type.EXECUTION_TIMED_OUT);
             }
 
-            deleteDirectory(submissionDir);
+            if (process.exitValue() != 0) {
+                throw new CodeRunnerException(output.toString(), CodeRunnerException.Type.EXECUTION_FAILED);
+            }
 
             return output.toString();
         } catch (IOException e) {
             throw new CodeRunnerException(e);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new CodeRunnerException(e);
+        } finally {
+            if (submissionDir != null) {
+                try {
+                    deleteDirectory(submissionDir);
+                } catch (IOException ignored) {
+                }
+            }
         }
     }
 
@@ -84,10 +95,11 @@ public class CodeRunner {
             if (!finished || process.exitValue() != 0) {
                 throw new CodeRunnerException(CodeRunnerException.Type.DOCKER_ERROR);
             }
-        } catch (IOException e) {
-            throw new CodeRunnerException(e);
-        } catch (InterruptedException e) {
-            throw new CodeRunnerException(e);
+        } catch (IOException | InterruptedException e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            throw new CodeRunnerException(CodeRunnerException.Type.DOCKER_ERROR);
         }
     }
 

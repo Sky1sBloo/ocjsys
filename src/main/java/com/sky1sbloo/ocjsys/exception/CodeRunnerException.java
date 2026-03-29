@@ -1,6 +1,5 @@
 package com.sky1sbloo.ocjsys.exception;
 
-import com.sky1sbloo.ocjsys.runner.CodeRunner;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -11,6 +10,8 @@ public class CodeRunnerException extends RuntimeException {
         INTERRUPTED("Process interrupted"),
         UNSUPPORTED_LANGUAGE("Unsupported language"),
         DOCKER_ERROR("Docker might not be running"),
+        EXECUTION_FAILED("Code execution failed"),
+        EXECUTION_TIMED_OUT("Code execution timed out"),
         UNKNOWN("Unknown");
 
         public final String label;
