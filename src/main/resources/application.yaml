@@ -6,6 +6,8 @@ spring:
       secret: Jj5XQ0hjRy8=PV0=NXxXaEZmWCxRWCoveHM4WCN6aTkrRj81YQ==dGgtTGE2elhjLHgpJXtU
       expiration-mins: 15
       refresh-expiration-days: 1
+  cors:
+    origin: http://localhost:5173
 ---
 spring:
   config:
@@ -27,8 +29,6 @@ spring:
     hibernate:
       show-sql: false
       ddl-auto: create-drop
-  cors:
-    origin: http://localhost:5173
 ---
 spring:
   config:
