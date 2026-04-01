@@ -27,6 +27,8 @@ spring:
     hibernate:
       show-sql: false
       ddl-auto: create-drop
+  cors:
+    origin: http://localhost:5173
 ---
 spring:
   config:
