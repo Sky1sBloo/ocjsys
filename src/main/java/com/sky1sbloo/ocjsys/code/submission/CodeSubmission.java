@@ -1,13 +1,14 @@
 package com.sky1sbloo.ocjsys.code.submission;
 
+import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblem;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity

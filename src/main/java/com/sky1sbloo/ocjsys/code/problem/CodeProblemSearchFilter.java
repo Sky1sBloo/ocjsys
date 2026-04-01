@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -16,5 +17,5 @@ public class CodeProblemSearchFilter {
     private UserProfile owner;
     private String title;
     private List<String> tags;
-    private List<Difficulties> difficulties;
+    private Set<Difficulties> difficulties;
 }

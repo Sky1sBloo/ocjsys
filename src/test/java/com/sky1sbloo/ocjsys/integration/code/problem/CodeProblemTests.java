@@ -1,9 +1,14 @@
 package com.sky1sbloo.ocjsys.integration.code.problem;
 
 import com.sky1sbloo.ocjsys.auth.dto.LoginResponse;
+import com.sky1sbloo.ocjsys.code.CodeLanguage;
+import com.sky1sbloo.ocjsys.code.problem.Difficulties;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
+import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemResponseDto;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateCreateDto;
 import com.sky1sbloo.ocjsys.integration.Authenticator;
 import com.sky1sbloo.ocjsys.integration.auth.SampleUsers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +16,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.List;
+import java.util.Set;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,16 +60,20 @@ public class CodeProblemTests {
         String authToken = authenticator.loginAndGetToken(sampleUsers.getUserLogin());
         CodeProblemCreateDto createDto = new CodeProblemCreateDto(
                 "Two Sum",
-                List.of("array", "hash-table"),
-                "EASY",
+                Set.of("array", "hash-table"),
+                Difficulties.EASY,
                 "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
                 "Use a hash map to store the indices of the numbers and check for the complement."
         );
-        mockMvc.perform(post("/api/code/problems")
+        MvcResult result = mockMvc.perform(post("/api/code/problems")
                         .header("Authorization", authToken)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(createDto)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated()).andReturn();
+        String location = result.getResponse().getHeader("Location");
+        Assertions.assertNotNull(location);
+        mockMvc.perform(get(location).header("Authorization", authToken))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -70,8 +81,8 @@ public class CodeProblemTests {
         LoginResponse loginResponse = authenticator.loginAndGetResponse(sampleUsers.getUserLogin());
         CodeProblemCreateDto createDto = new CodeProblemCreateDto(
                 "Two Sum",
-                List.of("array", "hash-table"),
-                "EASY",
+                Set.of("array", "hash-table"),
+                Difficulties.EASY,
                 "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
                 "Use a hash map to store the indices of the numbers and check for the complement."
         );
@@ -86,6 +97,34 @@ public class CodeProblemTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Two Sum"))
                 .andExpect(jsonPath("$[0].difficulty").value("EASY"))
-                .andExpect(jsonPath("$[0].owner.name").value(loginResponse.getName()));
+                .andExpect(jsonPath("$[0].owner").value("user"));
+    }
+
+    @Test
+    void createCodeProblemWithSolutionTemplateShouldSucceed() throws Exception {
+        String authToken = authenticator.loginAndGetToken(sampleUsers.getUserLogin());
+        CodeProblemCreateDto createDto = new CodeProblemCreateDto(
+                "Two Sum",
+                Set.of("array", "hash-table"),
+                Difficulties.EASY,
+                "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+                "Use a hash map to store the indices of the numbers and check for the complement.",
+                Set.of(new SolutionTemplateCreateDto(CodeLanguage.PYTHON, "func test()", "test()"))
+        );
+        MvcResult result = mockMvc.perform(post("/api/code/problems")
+                        .header("Authorization", authToken)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(createDto)))
+                .andExpect(status().isCreated()).andReturn();
+        String location = result.getResponse().getHeader("Location");
+        Assertions.assertNotNull(location);
+
+        MvcResult getResult = mockMvc.perform(get(location).header("Authorization", authToken))
+                .andExpect(status().isOk())
+                .andReturn();
+        CodeProblemResponseDto responseDto = objectMapper.readValue(getResult.getResponse().getContentAsString(),
+                CodeProblemResponseDto.class);
+        Assertions.assertNotNull(responseDto);
+        assertThat(responseDto.getSolutionTemplates().size()).isEqualTo(1);
     }
 }

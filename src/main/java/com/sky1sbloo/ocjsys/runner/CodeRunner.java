@@ -1,7 +1,11 @@
 package com.sky1sbloo.ocjsys.runner;
 
-import com.sky1sbloo.ocjsys.code.submission.CodeLanguage;
+import com.sky1sbloo.ocjsys.code.CodeLanguage;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplate;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplateService;
 import com.sky1sbloo.ocjsys.code.submission.CodeSubmission;
+import com.sky1sbloo.ocjsys.exception.CodeRunnerException;
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -15,42 +19,88 @@ import java.util.Comparator;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@RequiredArgsConstructor
 @Component
 public class CodeRunner {
-    public String runCode(CodeSubmission submission) throws IOException, InterruptedException {
-        return runCode(submission.getCode(), submission.getLanguage());
+    private final SolutionTemplateService solutionTemplateService;
+
+    /**
+     * This is used to run the code with the verifier
+     */
+    public String runCode(CodeSubmission submission) throws CodeRunnerException {
+        SolutionTemplate solutionTemplate = solutionTemplateService
+                .getSolutionTemplateOfProblem(submission.getProblem().getId(),  submission.getLanguage());
+        String combinedCode = submission.getCode() + "\n" + solutionTemplate.getVerifierSourceCode();
+        return runCode(combinedCode, submission.getLanguage());
     }
 
     public String runCode(String code, CodeLanguage language)
-            throws IOException, InterruptedException, IllegalArgumentException {
+            throws CodeRunnerException {
         if (language != CodeLanguage.PYTHON) {
-            throw new IllegalArgumentException("Unsupported language: " + language);
+            throw new CodeRunnerException("Unsupported language: " + language,
+                    CodeRunnerException.Type.UNSUPPORTED_LANGUAGE);
         }
-        String submissionId = UUID.randomUUID().toString();
-        Path submissionDir = Paths.get("/tmp/code_submission/" + submissionId);
-        Files.createDirectories(submissionDir);
-        Path codeFile = submissionDir.resolve("code_submission.py");
-        Files.writeString(codeFile, code);
-        Process process = getProcess(submissionDir);
-        StringBuilder output = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+        checkDockerRunning();
+
+        Path submissionDir = null;
+        try {
+            String submissionId = UUID.randomUUID().toString();
+            submissionDir = Paths.get("/tmp/code_submission/" + submissionId);
+            Files.createDirectories(submissionDir);
+            Path codeFile = submissionDir.resolve("code_submission.py");
+            Files.writeString(codeFile, code);
+
+            Process process = getProcess(submissionDir);
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                }
+            }
+
+            boolean finished = process.waitFor(5, TimeUnit.SECONDS);
+            if (!finished) {
+                process.destroyForcibly();
+                throw new CodeRunnerException(CodeRunnerException.Type.EXECUTION_TIMED_OUT);
+            }
+
+            if (process.exitValue() != 0) {
+                throw new CodeRunnerException(output.toString(), CodeRunnerException.Type.EXECUTION_FAILED);
+            }
+
+            return output.toString();
+        } catch (IOException e) {
+            throw new CodeRunnerException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new CodeRunnerException(e);
+        } finally {
+            if (submissionDir != null) {
+                try {
+                    deleteDirectory(submissionDir);
+                } catch (IOException ignored) {
+                }
             }
         }
+    }
 
-        boolean finished = process.waitFor(5, TimeUnit.SECONDS);
-
-        if (!finished) {
-            process.destroyForcibly();
-            output.append("Execution timed out\n");
+    private void checkDockerRunning() throws CodeRunnerException {
+        try {
+            Process process = new ProcessBuilder("docker", "info")
+                    .redirectErrorStream(true)
+                    .start();
+            boolean finished = process.waitFor(3, TimeUnit.SECONDS);
+            if (!finished || process.exitValue() != 0) {
+                throw new CodeRunnerException(CodeRunnerException.Type.DOCKER_ERROR);
+            }
+        } catch (IOException | InterruptedException e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            throw new CodeRunnerException(CodeRunnerException.Type.DOCKER_ERROR);
         }
-
-        deleteDirectory(submissionDir);
-
-        return output.toString();
     }
 
     private static @NonNull Process getProcess(Path submissionDir) throws IOException {

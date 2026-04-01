@@ -1,5 +1,6 @@
 package com.sky1sbloo.ocjsys.code.submission;
 
+import com.sky1sbloo.ocjsys.code.CodeLanguage;
 import com.sky1sbloo.ocjsys.code.problem.CodeProblemRepository;
 import com.sky1sbloo.ocjsys.code.submission.dto.CodeSubmissionDto;
 import com.sky1sbloo.ocjsys.runner.CodeRunner;
@@ -16,13 +17,13 @@ public class CodeSubmissionService {
     private final CodeProblemRepository codeProblemRepository;
     private final CodeRunner codeRunner;
 
-    public CodeSubmission submitCode(CodeSubmissionDto submission, UserProfile userProfile) throws IOException, InterruptedException {
+    public CodeSubmission submitCode(CodeSubmissionDto submission, UserProfile userProfile) {
         var codeSubmission = createCodeSubmission(submission, userProfile);
         codeRunner.runCode(codeSubmission);
         return codeSubmissionRepository.save(codeSubmission);
     }
 
-    public String runCode(CodeSubmissionDto submission, UserProfile userProfile) throws IOException, InterruptedException {
+    public String runCode(CodeSubmissionDto submission, UserProfile userProfile) {
         var codeSubmission = createCodeSubmission(submission, userProfile);
         return codeRunner.runCode(codeSubmission);
     }

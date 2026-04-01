@@ -2,14 +2,21 @@ package com.sky1sbloo.ocjsys.code.problem;
 
 import com.sky1sbloo.ocjsys.auth.AuthUser;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemCreateDto;
+import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemEditDto;
 import com.sky1sbloo.ocjsys.code.problem.dto.CodeProblemSearchFilterDto;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.SolutionTemplate;
+import com.sky1sbloo.ocjsys.code.problem.solutiontemplate.dto.SolutionTemplateCreateDto;
 import com.sky1sbloo.ocjsys.userprofile.UserProfile;
 import com.sky1sbloo.ocjsys.userprofile.UserProfileRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
@@ -17,8 +24,8 @@ public class CodeProblemService {
     private final CodeProblemRepository codeProblemRepository;
     private final UserProfileRepository userProfileRepository;
 
-    public List<CodeProblem> findProblems(CodeProblemSearchFilter filter) {
-        List<CodeProblem> codeProblems = new ArrayList<>();
+    public Set<CodeProblem> findProblems(CodeProblemSearchFilter filter) {
+        Set<CodeProblem> codeProblems = new HashSet<>();
         if (filter.getOwner() != null) {
             codeProblems.addAll(codeProblemRepository.findByOwner(filter.getOwner()));
         }
@@ -38,16 +45,51 @@ public class CodeProblemService {
         return codeProblems;
     }
 
-    public CodeProblem createProblem(CodeProblemCreateDto codeProblem, AuthUser authUser)
+    public CodeProblem findProblem(long id) {
+        return codeProblemRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    }
+
+    @Transactional
+    public CodeProblem createProblem(CodeProblemCreateDto codeProblemDto, AuthUser authUser)
             throws IllegalArgumentException {
         var newProblem = new CodeProblem();
         newProblem.setOwner(authUser.getUserProfile());
-        newProblem.setTitle(codeProblem.title());
-        newProblem.setDescription(codeProblem.description());
-        newProblem.setSolution(codeProblem.solution());
-        newProblem.setTags(codeProblem.tags());
-        newProblem.setDifficulty(Difficulties.valueOf(codeProblem.difficulty().toUpperCase()));
-        return codeProblemRepository.save(newProblem);
+        newProblem.setTitle(codeProblemDto.getTitle());
+        newProblem.setDescription(codeProblemDto.getDescription());
+        newProblem.setSolution(codeProblemDto.getSolution());
+        newProblem.setTags(codeProblemDto.getTags());
+        newProblem.setDifficulty(codeProblemDto.getDifficulty());
+        CodeProblem problem = codeProblemRepository.save(newProblem);
+        if (codeProblemDto.getSolutionTemplates() != null && !codeProblemDto.getSolutionTemplates().isEmpty()) {
+            for (SolutionTemplateCreateDto solutionTemplateDto : codeProblemDto.getSolutionTemplates()) {
+                SolutionTemplate template = SolutionTemplate.builder()
+                        .codeProblem(problem)
+                        .language(solutionTemplateDto.getLanguage())
+                        .sourceCode(solutionTemplateDto.getSourceCode())
+                        .verifierSourceCode(solutionTemplateDto.getVerifierSourceCode())
+                        .build();
+                problem.getSolutionTemplates().add(template);
+            }
+        }
+
+        return problem;
+    }
+
+    @Transactional
+    public CodeProblem editProblem(CodeProblemEditDto codeProblemEditDto, AuthUser authUser)
+            throws AccessDeniedException, IllegalArgumentException {
+        CodeProblem codeProblem = codeProblemRepository.findById(codeProblemEditDto.getId()).orElseThrow(
+                () -> new IllegalArgumentException("Problem with id " + codeProblemEditDto.getId() + " not found")
+        );
+        if (!codeProblem.getOwner().getAuthUser().getUsername().equals(authUser.getUsername())) {
+            throw new AccessDeniedException("Forbidden");
+        }
+        Optional.ofNullable(codeProblem.getTitle()).ifPresent(codeProblem::setTitle);
+        Optional.ofNullable(codeProblem.getDescription()).ifPresent(codeProblem::setDescription);
+        Optional.ofNullable(codeProblem.getSolution()).ifPresent(codeProblem::setSolution);
+        Optional.ofNullable(codeProblem.getTags()).ifPresent(codeProblem::setTags);
+        Optional.ofNullable(codeProblem.getDifficulty()).ifPresent(codeProblem::setDifficulty);
+        return codeProblemRepository.save(codeProblem);
     }
 
     public CodeProblemSearchFilter convertToFilter(CodeProblemSearchFilterDto filterDto) throws
@@ -60,7 +102,7 @@ public class CodeProblemService {
         filter.setTitle(filterDto.title());
         filter.setTags(filterDto.tags());
         if (filterDto.difficulties() != null) {
-            List<Difficulties> difficulties = new ArrayList<>();
+            Set<Difficulties> difficulties = new HashSet<>();
             for (String difficultyStr : filterDto.difficulties()) {
                 Difficulties difficulty = Difficulties.valueOf(difficultyStr.toUpperCase());
                 difficulties.add(difficulty);
