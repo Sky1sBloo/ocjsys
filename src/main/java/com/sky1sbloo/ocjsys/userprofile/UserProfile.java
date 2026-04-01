@@ -26,6 +26,7 @@ public class UserProfile {
     @JoinColumn(name="id")
     private AuthUser authUser;
 
+    @Column(nullable = false)
     private String name;
 
     @Builder.Default
